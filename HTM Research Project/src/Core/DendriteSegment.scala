@@ -2,7 +2,7 @@ package Core
 
 /**
  * @brief class DendriteSegment represents segment of connections, by which column or cell
- * receives feed-forward input or active states of other cells from same region.
+ * receives feed-forward input or prediction of other cells from same region.
  * @param connections list of connections and their permanences.
  * @param threshold value of permanence after which synapse is created.
  * @param boost segment overlap multiplier.
@@ -12,16 +12,16 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
 					  private val m_boost : Int) {
   
   /**
-   * Auxiliary constructor with boost set to 1
+   * Auxiliary constructor with boost set to 1.
    * @param connections list of connections and their permanences.
-   * @param threshold value of permanence after which synapse is created.
+   * @param threshold value of permanence after which synapse is "created".
    */
   def this(connections : List[(Int, Float)], threshold : Float) = 
     this(connections, threshold, 1)
     
   /**
    * Updates boost of the segment.
-   * @param newBoost new boost value,
+   * @param newBoost new boost value.
    * @return new segment with updated boost.
    */
   def withBoost(newBoost : Int) : DendriteSegment =
@@ -29,7 +29,7 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
   
   /**
    * Updates threshold of the segment.
-   * @param newThreshold new boost value.
+   * @param newThreshold new threshold value.
    * @return new segment with updated threshold.
    */
   def withThreshold(newThreshold: Int) : DendriteSegment =
@@ -45,6 +45,7 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
    */
   def updatePermanences[T](delta : Float,
 		  				   data : Vector[T],
+                           // XXX Change get method since we're always using Vector[T].
 		  				   get : (Vector[T], Int) => Int) : DendriteSegment = {
     
     def toSign(value : Int) : Int = if (value == 0) -1 else 1
@@ -66,19 +67,29 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
    * @param get function that gets value from data at specified index
    * @return overlap value over input data multiplied by boost
    */
+  // XXX Change get method since we're always using Vector[T].
   def overlap[T](data : Vector[T], get : (Vector[T], Int) => Int) : Int = {
-    // choose connections with permanence higher than threshold
+    // Choose connections with permanence higher than threshold.
     val synapses = m_connections.filter(_._2 >= m_threshold)
-    // map synapses to their activity values
+    // Map synapses to their activity values.
     val connectedValues = synapses.map(s => get(data, s._1))
     connectedValues.sum * m_boost
   }
 }
 
+/**
+ * @brief object DendriteSegment.
+ */
 object DendriteSegment {
   
+  /**
+   * Generates random permanences which are distributed near the threshold.
+   * @param length number of connections for which permanences are generated.
+   * @param threshold threshold for establishing synapses.
+   * @return list with random permanences.
+   */
   def genPermanences(length : Int, threshold : Float) : List[Float] = {
-    // XXX add seed to generator
+    // XXX Add seed to generator.
     val generator = new util.Random()
     
     def genPermanencesRecursive(l : Int) : List[Float] = {
