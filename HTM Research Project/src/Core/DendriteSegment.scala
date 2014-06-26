@@ -45,8 +45,7 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
    */
   def updatePermanences[T](delta : Float,
 		  				   data : Vector[T],
-                           // XXX Change get method since we're always using Vector[T].
-		  				   get : (Vector[T], Int) => Int) : DendriteSegment = {
+		  				   get : T => Int) : DendriteSegment = {
     
     def toSign(value : Int) : Int = if (value == 0) -1 else 1
     
@@ -57,7 +56,7 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
     else
       permanence
     
-    val updatedConnections = m_connections.map(c => (c._1, setBounds(toSign(get(data, c._1)))))
+    val updatedConnections = m_connections.map(c => (c._1, setBounds(toSign(get(data(c._1))))))
     new DendriteSegment(updatedConnections, m_threshold, m_boost)
   }
 		   
@@ -67,12 +66,11 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
    * @param get function that gets value from data at specified index
    * @return overlap value over input data multiplied by boost
    */
-  // XXX Change get method since we're always using Vector[T].
-  def overlap[T](data : Vector[T], get : (Vector[T], Int) => Int) : Int = {
+  def overlap[T](data : Vector[T], get : T => Int) : Int = {
     // Choose connections with permanence higher than threshold.
     val synapses = m_connections.filter(_._2 >= m_threshold)
     // Map synapses to their activity values.
-    val connectedValues = synapses.map(s => get(data, s._1))
+    val connectedValues = synapses.map(s => get(data(s._1)))
     connectedValues.sum * m_boost
   }
 }
