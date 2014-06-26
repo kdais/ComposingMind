@@ -84,9 +84,12 @@ object DendriteSegment {
    * Generates random permanences which are distributed near the threshold.
    * @param length number of connections for which permanences are generated.
    * @param threshold threshold for establishing synapses.
+   * @param radius maximum distance of distribution for generated values.
    * @return list with random permanences.
    */
-  def genPermanences(length : Int, threshold : Float) : List[Float] = {
+  def genPermanences(length : Int, threshold : Float, radius : Float) : List[Float] = {
+    
+    assert(radius >= 0.0F && radius <= 0.5F)
     // XXX Add seed to generator.
     val generator = new util.Random()
     
@@ -94,7 +97,8 @@ object DendriteSegment {
       if (l == 0)
         Nil
       else
-        (threshold + ((generator.nextFloat() - 0.5F) / 5.0F)) :: genPermanencesRecursive(l - 1) 
+        (threshold + ((generator.nextFloat() - 0.5F) * 2.0F * radius)) ::
+        genPermanencesRecursive(l - 1)
     }
     
     genPermanencesRecursive(length)
