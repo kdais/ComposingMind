@@ -56,7 +56,8 @@ class DendriteSegment(private val m_connections : List[(Int, Float)], // (connec
     else
       permanence
     
-    val updatedConnections = m_connections.map(c => (c._1, setBounds(toSign(get(data(c._1))))))
+    val updatedConnections = m_connections.map(c => 
+      (c._1, setBounds(c._2 + delta * toSign(get(data(c._1))))))
     new DendriteSegment(updatedConnections, m_threshold, m_boost)
   }
 		   
