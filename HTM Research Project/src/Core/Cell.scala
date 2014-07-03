@@ -4,7 +4,7 @@ package Core
  * @brief class Cell represents a single cell in a column that has its unique behavior
  * in terms of column's input and prediction of distal dendrites.   
  */
-class Cell(val m_state : Int) {
+class Cell(private val m_state : Int) {
   
   /**
    * Checks whether cell is in active state.
