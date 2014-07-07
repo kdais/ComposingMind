@@ -17,4 +17,10 @@ class DistalSegment(private val m_connections : List[Int]) extends DendriteSegme
     val connectedValues = m_connections.map(s => get(data(s)))
     connectedValues.sum
   }
+  
+  /**
+   * Returns number of connections of the segment.
+   * @return number of connections.
+   */
+  def numOfConnections : Int = m_connections.length
 }

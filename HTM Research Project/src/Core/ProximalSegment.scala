@@ -86,6 +86,12 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
     val connectedValues = synapses.map(s => get(data(s._1)))
     connectedValues.sum * m_boost
   }
+  
+  /**
+   * Returns number of connections of the segment.
+   * @return number of connections.
+   */
+  def numOfConnections : Int = m_connections.length
 }
 
 /**
