@@ -8,7 +8,7 @@ package Core
 class Column(private val m_firstCell : Int,
 			 // XXX maybe remove nCells from here because it is common for all columns in region.
 			 private val m_nCells : Int,
-			 private val m_proximalSegment : DendriteSegment) {
+			 private val m_proximalSegment : ProximalSegment) {
   
   /**
    * Calculates overlap of the proximal segment over given data. 
