@@ -97,7 +97,6 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
 /**
  * @brief object DendriteSegment.
  */
-//XXX Separate distal and proximal dendrite segments.
 object ProximalSegment {
   
   /**

@@ -1,8 +1,8 @@
 package Core
 
 /**
- * @brief class Column represents a column of cells. Its main purpose is to group cells which will
- * "receive" same feed-forward input.
+ * @brief class Column represents a column of cells. Its main purpose is to group cells which
+ * will "receive" same feed-forward input.
  * @param cells - 
  */
 class Column(private val m_firstCell : Int,
