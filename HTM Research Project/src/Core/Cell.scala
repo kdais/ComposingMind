@@ -60,25 +60,40 @@ class Cell(private val m_steps : Int,
    * @param step on which step we check if cell is predicted.
    * @return true if cell is predicted, or false otherwise.  
    */
-  def isPredicted(cells : Vector[Cell], step : Int) : Boolean = {
-    
-    def isSegmentPredicting(s : DistalSegment) : Boolean = {
-      s.overlap(cells, (c : Cell) => if (c.wasActive()) 1 else 0).toFloat /
-          s.numOfConnections.toFloat > Cell.PredictionThreshold
-    }
-    
-    m_distalSegments(step).exists(isSegmentPredicting(_))
-  }
+  def isPredicted(cells : Vector[Cell], step : Int) : Boolean =
+    m_distalSegments(step).exists(isSegmentPredicting(_, cells))
   
   /**
    * Checks whether cell is predicted on any step.
    * @param cells vector of cells of the region.
-   * @return true if cell is predicted, or false otherwise.  
+   * @return true if cell is predicted, or false otherwise.
    */
   def isEverPredicted(cells : Vector[Cell]) : Boolean = {
     val stepsRange = 0 until m_steps
     stepsRange.exists(isPredicted(cells, _))
   }
+  
+  /**
+   * Updates segments according to the state of other cells. Removes those which expired.
+   * @param cells vector of all cells in a region.
+   * @return new cell with updated distal segments.
+   */
+  def withUpdatedSegments(cells : Vector[Cell]) : Cell = {
+    
+    def updateByPrediction(seg : DistalSegment) : DistalSegment =
+      if (isSegmentPredicting(seg, cells))
+        seg.updateExpirationTime(DistalSegment.DefaultExpirationTime / 2)
+      else
+        seg.updateExpirationTime()
+        
+    val updatedSegments = m_distalSegments.map(_.map(updateByPrediction(_)).filter(!_.expired))
+    new Cell(m_steps, m_stateHistory, updatedSegments)
+  }
+    
+  private def isSegmentPredicting(seg : DistalSegment, cells : Vector[Cell]) : Boolean = {
+      seg.overlap(cells, (c : Cell) => if (c.wasActive()) 1 else 0).toFloat /
+          seg.numOfConnections.toFloat > Cell.PredictionThreshold
+    }
 }
 
 /**
