@@ -9,7 +9,7 @@ package Core
 class DistalSegment(private val m_connections : List[Int],
 					private val m_expirationTime : Int) extends DendriteSegment {
   
-  require(m_expirationTime > 0)
+  require(m_expirationTime >= 0)
   
   /**
    * Calculates overlap of the segment over given data. 
