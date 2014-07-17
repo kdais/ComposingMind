@@ -80,8 +80,6 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
    * @return overlap value over input data multiplied by boost.
    */
   def overlap[T](data : Vector[T], get : T => Int) : Int = {
-    // Choose connections with permanence higher than threshold.
-    val synapses = m_connections.filter(_._2 >= m_threshold)
     // Map synapses to their activity values.
     val connectedValues = synapses.map(s => get(data(s._1)))
     connectedValues.sum * m_boost
@@ -92,6 +90,18 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
    * @return number of connections.
    */
   def numOfConnections : Int = m_connections.length
+  
+  /**
+   * Returns number of synapses of the segment.
+   * @return number of synapses.
+   */
+  def numOfSynapses : Int = synapses.length
+  
+  /**
+   * Takes connections with permanence higher than threshold.
+   * @return list of synapses.
+   */
+  private def synapses : List[(Int, Float)] = m_connections.filter(_._2 >= m_threshold)
 }
 
 /**
