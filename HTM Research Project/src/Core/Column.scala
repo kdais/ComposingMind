@@ -3,7 +3,9 @@ package Core
 /**
  * @brief class Column represents a column of cells. Its main purpose is to group cells which
  * will "receive" same feed-forward input.
- * @param cells - 
+ * @param m_firstCell - index of the first column's cell in a region.
+ * @param m_nCells - number of cells in a column.
+ * @param m_proximalSegment - column's proximal segment.
  */
 class Column(private val m_firstCell : Int,
 			 // XXX maybe remove nCells from here because it is common for all columns in region.
@@ -15,25 +17,35 @@ class Column(private val m_firstCell : Int,
    * @param data collection of inputs to the segment.
    * @return overlap value over input data.
    */
-  def overlap(data : Vector[Int]) : Int = {
-    m_proximalSegment.overlap(data, (x : Int) => x)
+  def overlap(data : Vector[Int]) : Int = m_proximalSegment.overlap(data, (x : Int) => x)
+  
+  /**
+   * Creates a list of active cells in context of region's prediction.
+   * @param cells - cells of the region.
+   * @return list of active cells.
+   */
+  def activeCells(cells : Vector[Cell]) : List[Int] = {
+    val myCells = List.range(m_firstCell, m_firstCell + m_nCells, 1)
+    val predictedCells = myCells.filter(cells(_).isEverPredicted(cells))
+    
+    //If none of the cells is predicted, activate entire column. 
+    if (!predictedCells.isEmpty) predictedCells else myCells
   }
   
   /**
-   * Updates vector of region's cells (just those that belong to column) using some function.
-   * @param cells vector of region's cells.
-   * @param update function that creates modified cell.
-   * @return vector with updated cells, that belong to column.
+   * Updates permanences of connections by adding some value to connections, which
+   * contributed to segment activation, and subtracting from those, which did not.
+   * @param delta value by which permanences will be updated.
+   * @param data collection of inputs to the segment.
+   * @return new segment with updated synapses. 
    */
-  private def updateCells(cells : Vector[Cell], update : Cell => Cell) : Vector[Cell] = {
-    
-    def updateCellsRecursive(c : Vector[Cell], index : Int) : Vector[Cell] = {
-      if (index == m_firstCell + m_nCells)
-        cells
-      else
-        updateCellsRecursive(cells.updated(index, update(cells(index))), index + 1)
-    }
-        
-    updateCellsRecursive(cells, m_firstCell)
-  }
+  def updateConnections(delta : Float, data : Vector[Int]) : Column =
+    new Column(m_firstCell, m_nCells,
+        m_proximalSegment.updatePermanences(delta, data, (x : Int) => x))
+  
+  /**
+   * Number of column's synapses.
+   * @return number of "active" connections.
+   */
+  def receptiveFieldSize : Int = m_proximalSegment.numOfSynapses
 }
