@@ -4,12 +4,9 @@ package Core
  * @brief class Column represents a column of cells. Its main purpose is to group cells which
  * will "receive" same feed-forward input.
  * @param m_firstCell - index of the first column's cell in a region.
- * @param m_nCells - number of cells in a column.
  * @param m_proximalSegment - column's proximal segment.
  */
 class Column(private val m_firstCell : Int,
-			 // XXX maybe remove nCells from here because it is common for all columns in region.
-			 private val m_nCells : Int,
 			 private val m_proximalSegment : ProximalSegment) {
   
   /**
@@ -21,11 +18,12 @@ class Column(private val m_firstCell : Int,
   
   /**
    * Creates a list of active cells in context of region's prediction.
-   * @param cells - cells of the region.
+   * @param cells cells of the region.
+   * @param nCells number of cells in a column. 
    * @return list of active cells.
    */
-  def activeCells(cells : Vector[Cell]) : List[Int] = {
-    val myCells = List.range(m_firstCell, m_firstCell + m_nCells, 1)
+  def activeCells(cells : Vector[Cell], nCells : Int) : List[Int] = {
+    val myCells = List.range(m_firstCell, m_firstCell + nCells, 1)
     val predictedCells = myCells.filter(cells(_).isEverPredicted(cells))
     
     //If none of the cells is predicted, activate entire column. 
@@ -40,8 +38,8 @@ class Column(private val m_firstCell : Int,
    * @return new segment with updated synapses. 
    */
   def updateConnections(delta : Float, data : Vector[Int]) : Column =
-    new Column(m_firstCell, m_nCells,
-        m_proximalSegment.updatePermanences(delta, data, (x : Int) => x))
+    new Column(m_firstCell,
+    		   m_proximalSegment.updatePermanences(delta, data, (x : Int) => x))
   
   /**
    * Percentage of column's synapses.
