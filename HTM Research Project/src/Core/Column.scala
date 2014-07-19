@@ -44,8 +44,9 @@ class Column(private val m_firstCell : Int,
         m_proximalSegment.updatePermanences(delta, data, (x : Int) => x))
   
   /**
-   * Number of column's synapses.
-   * @return number of "active" connections.
+   * Percentage of column's synapses.
+   * @return percentage of "active" connections.
    */
-  def receptiveFieldSize : Int = m_proximalSegment.numOfSynapses
+  def receptiveFieldSize : Float =
+    m_proximalSegment.numOfSynapses.toFloat / m_proximalSegment.numOfConnections.toFloat
 }
