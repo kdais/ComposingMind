@@ -14,7 +14,8 @@ class Column(private val m_firstCell : Int,
    * @param data collection of inputs to the segment.
    * @return overlap value over input data.
    */
-  def overlap(data : Vector[Int]) : Int = m_proximalSegment.overlap(data, (x : Int) => x)
+  def overlap(data : Vector[Boolean]) : Int =
+    m_proximalSegment.overlap(data, (x : Boolean) =>if (x) 1 else 0)
   
   /**
    * Creates a list of active cells in context of region's prediction.
