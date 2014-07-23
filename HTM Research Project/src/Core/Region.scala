@@ -10,6 +10,11 @@ class Region(private val m_cells : Vector[Cell],
   
   require(m_cells.length % m_columns.length == 0)
   
+  /**
+   * Performs spatial pooling - calculates winning columns over given data.
+   * @param data - input vector.
+   * @return list of activated columns.
+   */
   def activeColumns(data : Vector[Boolean]) : List[Int] = {
     val overlaps = m_columns.map(_.overlap(data))
     val recepriveFields = m_columns.map(_.receptiveFieldSize)
