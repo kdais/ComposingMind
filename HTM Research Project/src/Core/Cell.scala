@@ -102,4 +102,6 @@ class Cell(private val m_steps : Int,
 object Cell {
   
   val PredictionThreshold = 0.8F
+  
+  val DefaultSteps = 3
 }

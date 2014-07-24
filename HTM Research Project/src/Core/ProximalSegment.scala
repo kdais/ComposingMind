@@ -109,6 +109,29 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
  */
 object ProximalSegment {
   
+  val DefaultThreshold = 0.5F
+  
+  val DefaultRadius = 0.2F
+  
+  def genDefaultSegment(length : Int, dataLength : Int) : ProximalSegment ={
+    val connections = genConnectionIndexes(length, dataLength) zip 
+      genPermanences(length, DefaultThreshold, DefaultRadius)
+    
+    new ProximalSegment(connections, DefaultThreshold)
+  }
+  
+  /**
+   * Generates random indexes to which segment is connected.
+   * @param length number of connections.
+   * @param dataLength size of input data collection.
+   * @return list of random indexes.
+   */
+  def genConnectionIndexes(length : Int, dataLength : Int) : List[Int] = {
+    val randomIndexes = util.Random.shuffle(List.range(0, dataLength, 1))
+    
+    randomIndexes.take(length)
+  }
+  
   /**
    * Generates random permanences which are distributed near the threshold.
    * @param length number of connections for which permanences are generated.
