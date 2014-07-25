@@ -71,6 +71,26 @@ class Region(private val m_cells : Vector[Cell],
  */
 object Region {
   
+  val defaultRegionEdge = 30
+  
+  /**
+   * Generates a region with with "clear" cells and columns.
+   * @param dataLength length of the input collection.
+   * @param regionEdge length of region's edge (in columns).
+   * @param cellsPerColumn - number of cells in one column.
+   */
+  def genRegion(dataLength : Int, regionEdge : Int, cellsPerColumn : Int) : Region = {
+    val numOfColumns = regionEdge * regionEdge
+    val numOfCells = numOfColumns * cellsPerColumn
+    val cellIndexes = Vector.range(0, numOfCells, cellsPerColumn)
+    
+    val columns = cellIndexes.map(
+        new Column(_, ProximalSegment.genDefaultSegment(dataLength / 2, dataLength)))
+    val cells = Vector.range(0, numOfCells, 1).map(i => new Cell(Cell.DefaultSteps))
+    
+    new Region(cells, columns)
+  }
+  
   private val inhibitionRadiusMultiplier = 0.5F
   
   private val inhibitionThreshold = 4
