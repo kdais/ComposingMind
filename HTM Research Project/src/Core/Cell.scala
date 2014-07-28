@@ -61,7 +61,7 @@ class Cell(private val m_steps : Int,
    * @return true if cell is predicted, or false otherwise.  
    */
   def isPredicted(cells : Vector[Cell], step : Int) : Boolean =
-    m_distalSegments(step).exists(isSegmentPredicting(_, cells))
+    m_distalSegments(step).exists(isSegmentPredicting(_, cells, step))
   
   /**
    * Checks whether cell is predicted on any step.
@@ -80,18 +80,23 @@ class Cell(private val m_steps : Int,
    */
   def withUpdatedSegments(cells : Vector[Cell]) : Cell = {
     
-    def updateByPrediction(seg : DistalSegment) : DistalSegment =
-      if (isSegmentPredicting(seg, cells))
+    def updateByPrediction(seg : DistalSegment, step : Int) : DistalSegment =
+      if (isSegmentPredicting(seg, cells, step))
         seg.updateExpirationTime(DistalSegment.DefaultExpirationTime / 2)
       else
         seg.updateExpirationTime()
-        
-    val updatedSegments = m_distalSegments.map(_.map(updateByPrediction(_)).filter(!_.expired))
+    
+    val updatedSegments = for {
+      step <- Vector.range(0, m_steps)
+    } yield m_distalSegments(step).map(updateByPrediction(_, step)).filter(!_.expired)
+    
     new Cell(m_steps, m_stateHistory, updatedSegments)
   }
     
-  private def isSegmentPredicting(seg : DistalSegment, cells : Vector[Cell]) : Boolean = {
-      seg.overlap(cells, (c : Cell) => if (c.wasActive()) 1 else 0).toFloat /
+  private def isSegmentPredicting(seg : DistalSegment,
+                                  cells : Vector[Cell],
+                                  step : Int) : Boolean = {
+      seg.overlap(cells, (c : Cell) => if (c.wasActive(step)) 1 else 0).toFloat /
           seg.numOfConnections.toFloat > Cell.PredictionThreshold
     }
 }
