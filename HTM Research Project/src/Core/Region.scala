@@ -13,16 +13,30 @@ class Region(private val m_cells : Vector[Cell],
   /**
    * Performs spatial pooling - calculates winning columns over given data.
    * @param data - input vector.
+   * @param activationPercentage - how many columns will be activated (0.0 - 1.0 value).
    * @return list of activated columns.
    */
-  def activeColumns(data : Vector[Boolean]) : List[Int] = {
+  def activeColumns(data : Vector[Boolean], activationPercentage : Float) : List[Int] = {
+    
+    assert(activationPercentage > 0.0F && activationPercentage < 1.0F)
+    
     val overlaps = m_columns.map(_.overlap(data))
     val recepriveFields = m_columns.map(_.receptiveFieldSize)
+    // Average percentage of synapses in columns.
     val averageReceptiveField = recepriveFields.sum / m_columns.length
-    val inhibitionRadius = averageReceptiveField * Region.inhibitionRadiusMultiplier toInt
+    // Region's diagonal multiplied by avarage percentage of synapses. 
+    val inhibitionRadius = (m_regionEdgeSize *  averageReceptiveField *
+      Region.inhibitionRadiusMultiplier).toInt
+    // Number of columns that are allowed to be active inside inhibition radius.
+    val inhibitionThreshold = m_columns.length * activationPercentage toInt
     
-    def manhattanDist(a : (Int, Int), b : (Int, Int)) : Int =
+    println(inhibitionRadius)
+    println(inhibitionThreshold)
+    println(m_columns.length)
+    
+    def manhattanDist(a : (Int, Int), b : (Int, Int)) : Int = {
       math.abs(a._1 - b._1) + math.abs(a._2 - b._2)
+    }
       
     def neighborsIndexes(index : Int) : Vector[Int] = {
       val allIndexes = Vector.range(0, m_columns.length, 1)
@@ -34,7 +48,7 @@ class Region(private val m_cells : Vector[Cell],
     def isOverInhibitionThreshold (index : Int) : Boolean = {
       val neighborsOverlaps = neighborsIndexes(index).map(overlaps(_)).sortWith((a, b) => a > b)
       
-      overlaps(index) >= neighborsOverlaps(Region.inhibitionThreshold)
+      overlaps(index) >= neighborsOverlaps(inhibitionThreshold)
     }
     
     List.range(0, m_columns.length, 1).filter(isOverInhibitionThreshold(_))
@@ -91,7 +105,5 @@ object Region {
     new Region(cells, columns)
   }
   
-  private val inhibitionRadiusMultiplier = 0.5F
-  
-  private val inhibitionThreshold = 4
+  private val inhibitionRadiusMultiplier = 1.4F
 }
