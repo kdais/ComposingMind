@@ -30,10 +30,6 @@ class Region(private val m_cells : Vector[Cell],
     // Number of columns that are allowed to be active inside inhibition radius.
     val inhibitionThreshold = m_columns.length * activationPercentage toInt
     
-    println(inhibitionRadius)
-    println(inhibitionThreshold)
-    println(m_columns.length)
-    
     def manhattanDist(a : (Int, Int), b : (Int, Int)) : Int = {
       math.abs(a._1 - b._1) + math.abs(a._2 - b._2)
     }
