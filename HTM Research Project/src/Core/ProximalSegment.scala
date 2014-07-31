@@ -109,15 +109,11 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
  */
 object ProximalSegment {
   
-  val DefaultThreshold = 0.5F
-  
-  val DefaultRadius = 0.2F
-  
   def genDefaultSegment(length : Int, dataLength : Int) : ProximalSegment ={
     val connections = genConnectionIndexes(length, dataLength) zip 
-      genPermanences(length, DefaultThreshold, DefaultRadius)
+      genPermanences(length, Constants.ProximalThreshold, Constants.ProximalThresholdRadius)
     
-    new ProximalSegment(connections, DefaultThreshold)
+    new ProximalSegment(connections, Constants.ProximalThreshold)
   }
   
   /**

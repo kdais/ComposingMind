@@ -82,7 +82,7 @@ class Cell(private val m_steps : Int,
     
     def updateByPrediction(seg : DistalSegment, step : Int) : DistalSegment =
       if (isSegmentPredicting(seg, cells, step))
-        seg.updateExpirationTime(DistalSegment.DefaultExpirationTime / 2)
+        seg.updateExpirationTime(Constants.DistalExpirationTime / 2)
       else
         seg.updateExpirationTime()
     
@@ -97,16 +97,6 @@ class Cell(private val m_steps : Int,
                                   cells : Vector[Cell],
                                   step : Int) : Boolean = {
       seg.overlap(cells, (c : Cell) => if (c.wasActive(step)) 1 else 0).toFloat /
-          seg.numOfConnections.toFloat > Cell.PredictionThreshold
+          seg.numOfConnections.toFloat > Constants.ProximalThreshold
     }
-}
-
-/**
- * @brief object Cell.
- */
-object Cell {
-  
-  val PredictionThreshold = 0.8F
-  
-  val DefaultSteps = 3
 }

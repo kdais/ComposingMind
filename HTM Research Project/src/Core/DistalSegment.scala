@@ -37,7 +37,7 @@ class DistalSegment(private val m_connections : List[Int],
     assert(m_expirationTime + time >= 0)
     
     new DistalSegment(m_connections,
-        List(m_expirationTime + time, DistalSegment.MaxExpirationTime).min)
+        List(m_expirationTime + time, Constants.MaxDistalExpirationTime).min)
   }
   
   /**
@@ -52,6 +52,5 @@ class DistalSegment(private val m_connections : List[Int],
  */
 object DistalSegment {
   
-  val DefaultExpirationTime = 10
-  val MaxExpirationTime = 20
+
 }

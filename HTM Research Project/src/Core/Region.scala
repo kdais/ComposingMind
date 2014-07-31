@@ -85,8 +85,6 @@ class Region(private val m_cells : Vector[Cell],
  */
 object Region {
   
-  val defaultRegionEdge = 30
-  
   /**
    * Generates a region with with "clear" cells and columns.
    * @param dataLength length of the input collection.
@@ -100,7 +98,7 @@ object Region {
     
     val columns = cellIndexes.map(
         new Column(_, ProximalSegment.genDefaultSegment(dataLength / 2, dataLength)))
-    val cells = Vector.range(0, numOfCells, 1).map(i => new Cell(Cell.DefaultSteps))
+    val cells = Vector.range(0, numOfCells, 1).map(i => new Cell(Constants.CellDefaultSteps))
     
     new Region(cells, columns)
   }
