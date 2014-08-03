@@ -15,7 +15,7 @@ class Column(private val m_firstCell : Int,
    * @return overlap value over input data.
    */
   def overlap(data : Vector[Boolean]) : Int =
-    m_proximalSegment.overlap(data, (x : Boolean) =>if (x) 1 else 0)
+    m_proximalSegment.overlap(data, getData)
   
   /**
    * Creates a list of active cells in context of region's prediction.
@@ -38,9 +38,9 @@ class Column(private val m_firstCell : Int,
    * @param data collection of inputs to the segment.
    * @return new segment with updated synapses. 
    */
-  def updateConnections(delta : Float, data : Vector[Int]) : Column =
+  def updateConnections(delta : Float, data : Vector[Boolean]) : Column =
     new Column(m_firstCell,
-    		   m_proximalSegment.updatePermanences(delta, data, (x : Int) => x))
+    		   m_proximalSegment.updatePermanences(delta, data, getData))
   
   /**
    * Percentage of column's synapses.
@@ -48,4 +48,6 @@ class Column(private val m_firstCell : Int,
    */
   def receptiveFieldSize : Float =
     m_proximalSegment.numOfSynapses.toFloat / m_proximalSegment.numOfConnections.toFloat
+    
+    private def getData(b : Boolean) = if (b) 1 else 0 
 }
