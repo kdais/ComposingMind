@@ -51,6 +51,26 @@ class Region(private val m_cells : Vector[Cell],
   }
   
   /**
+   * Adjusts region's columns by modifying their permanences of those, which were
+   * activated due to given input.
+   * @param data region's input.
+   * @param activeCols list of activated columns.
+   * @return new Region with columns, adjusted to given input.
+   */
+  def adjustToInput(data : Vector[Boolean], activeCols : List[Int]) : Region = {
+    
+    def adjustColumns(toUpdate : List[Int]) : Vector[Column] =
+      if (toUpdate.isEmpty)
+        m_columns
+      else
+        adjustColumns(toUpdate.tail).
+          updated(toUpdate.head, m_columns(toUpdate.head).
+              updateConnections(Constants.ProximalAdjustDelta, data))
+
+    new Region(m_cells, adjustColumns(activeCols))
+  }
+  
+  /**
    * @brief Number of cells in one column.
    */
   private val m_cellsPerColumn : Int = m_cells.length / m_columns.length

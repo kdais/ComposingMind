@@ -37,6 +37,11 @@ object Constants {
   val ProximalThresholdRadius = 0.2F
   
   /**
+   * @brief value by which permanences of active columns' segments are updated. 
+   */
+  val ProximalAdjustDelta = 0.05F
+  
+  /**
    * @brief default number of cells in region's square's edge.
    */
   val RegionEdge = 30
