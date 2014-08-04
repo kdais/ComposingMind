@@ -25,7 +25,7 @@ class Column(private val m_firstCell : Int,
    */
   def activeCells(cells : Vector[Cell], nCells : Int) : List[Int] = {
     val myCells = List.range(m_firstCell, m_firstCell + nCells, 1)
-    val predictedCells = myCells.filter(cells(_).isEverPredicted(cells))
+    val predictedCells = myCells.filter(cells(_).isPredicted(cells, 0))
     
     //If none of the cells is predicted, activate entire column. 
     if (!predictedCells.isEmpty) predictedCells else myCells
