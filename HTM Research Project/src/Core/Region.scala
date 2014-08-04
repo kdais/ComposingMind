@@ -71,6 +71,18 @@ class Region(private val m_cells : Vector[Cell],
   }
   
   /**
+   * Looks at what cells will be activated due to current input in context of previous state.
+   * @param activeCols list of active columns.
+   * @return list of indexes of activated cells.
+   */
+  def activeCells(activeCols : List[Int]) : List[Int] = {
+    val cellLists : List[List[Int]] = 
+      for (i <- activeCols) yield m_columns(i).activeCells(m_cells, m_cellsPerColumn)
+
+    foldIndexes(cellLists)
+  }
+  
+  /**
    * @brief Number of cells in one column.
    */
   private val m_cellsPerColumn : Int = m_cells.length / m_columns.length
@@ -94,6 +106,14 @@ class Region(private val m_cells : Vector[Cell],
    * @return index in one dimensional vector.
    */
   private def toIndex(point : (Int, Int)) : Int = point._1 * m_regionEdgeSize + point._2
+  
+  /**
+   * Merges all indexes that are contained in a separate lists.
+   * @param lists list of lists of indexes.
+   * @return list containing all those indexes. 
+   */
+  private def foldIndexes(lists : List[List[Int]]) : List[Int] =
+    lists.foldLeft(List[Int]())(_ ::: _)
 }
 
 /**
