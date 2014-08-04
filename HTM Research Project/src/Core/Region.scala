@@ -24,7 +24,7 @@ class Region(private val m_cells : Vector[Cell],
     val recepriveFields = m_columns.map(_.receptiveFieldSize)
     // Average percentage of synapses in columns.
     val averageReceptiveField = recepriveFields.sum / m_columns.length
-    // Region's diagonal multiplied by avarage percentage of synapses. 
+    // Region's diagonal multiplied by average percentage of synapses.
     val inhibitionRadius = (m_regionEdgeSize *  averageReceptiveField *
       Region.inhibitionRadiusMultiplier).toInt
     // Number of columns that are allowed to be active inside inhibition radius.
