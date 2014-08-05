@@ -8,8 +8,8 @@ package Core
  * @param m_distalSegments vector of distal segments for making prediction.
  */
 class Cell(private val m_steps : Int,
-		   private val m_stateHistory : Vector[Boolean],
-		   private val m_distalSegments : Vector[List[DistalSegment]]) {
+		   private val m_stateHistory : List[Boolean],
+		   private val m_distalSegments : List[List[DistalSegment]]) {
   
   require(m_steps > 0 && m_stateHistory.length == m_steps && m_distalSegments.length == m_steps)
   
@@ -18,19 +18,19 @@ class Cell(private val m_steps : Int,
    * @param steps size of history and "prediction".
    * @return empty cell.
    */
-  def this(steps : Int) = this(steps, Vector.fill(steps)(false), Vector.fill(steps)(Nil))
+  def this(steps : Int) = this(steps, List.fill(steps)(false), List.fill(steps)(Nil))
   
   /**
    * Makes cell active by pushing active state to its history of states.
    * @return new cell with active state. 
    */
-  def makeActive : Cell = new Cell(m_steps, true +: m_stateHistory.init, m_distalSegments)
+  def makeActive : Cell = new Cell(m_steps, true :: m_stateHistory.init, m_distalSegments)
   
   /**
    * Makes cell inactive by pushing active state to its history of states.
    * @return new cell with inactive state. 
    */
-  def makeInactive : Cell = new Cell(m_steps, false +: m_stateHistory.init, m_distalSegments)
+  def makeInactive : Cell = new Cell(m_steps, false :: m_stateHistory.init, m_distalSegments)
   
   /**
    * Checks whether cell was active on a specified step.
@@ -87,7 +87,7 @@ class Cell(private val m_steps : Int,
         seg.updateExpirationTime()
     
     val updatedSegments = for {
-      step <- Vector.range(0, m_steps)
+      step <- List.range(0, m_steps)
     } yield m_distalSegments(step).map(updateByPrediction(_, step)).filter(!_.expired)
     
     new Cell(m_steps, m_stateHistory, updatedSegments)
