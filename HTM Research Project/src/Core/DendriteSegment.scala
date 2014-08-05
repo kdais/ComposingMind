@@ -17,4 +17,10 @@ abstract class DendriteSegment {
    * @return number of connections.
    */
   def numOfConnections : Int
+  
+  /**
+   * Indexes of segment's connections.
+   * @return list of indexes. 
+   */
+  def connectionIndexes : List[Int]
 }

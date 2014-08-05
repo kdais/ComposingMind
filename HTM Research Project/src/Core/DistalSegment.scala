@@ -29,6 +29,12 @@ class DistalSegment(private val m_connections : List[Int],
   def numOfConnections : Int = m_connections.length
   
   /**
+   * Indexes of segment's connections.
+   * @return list of indexes. 
+   */
+  def connectionIndexes : List[Int] = m_connections
+  
+  /**
    * Updates expiration time of the segment.
    * @param time change of the time that is left for a segment.
    * @return new distal segment with updated expiration time.

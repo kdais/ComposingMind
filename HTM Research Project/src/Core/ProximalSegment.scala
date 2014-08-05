@@ -92,6 +92,12 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
   def numOfConnections : Int = m_connections.length
   
   /**
+   * Indexes of segment's connections.
+   * @return list of indexes. 
+   */
+  def connectionIndexes : List[Int] = m_connections.unzip._1
+  
+  /**
    * Returns number of synapses of the segment.
    * @return number of synapses.
    */
