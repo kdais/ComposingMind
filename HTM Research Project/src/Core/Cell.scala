@@ -92,6 +92,13 @@ class Cell(private val m_steps : Int,
     
     new Cell(m_steps, m_stateHistory, updatedSegments)
   }
+  
+  /**
+   * Counts number of segments for specific step of prediction.
+   * @param step prediction step.
+   * @return number of segments on the prediction step.
+   */
+  def numOfSegments(step : Int) : Int = m_distalSegments(step).length
     
   private def isSegmentPredicting(seg : DistalSegment,
                                   cells : Vector[Cell],
