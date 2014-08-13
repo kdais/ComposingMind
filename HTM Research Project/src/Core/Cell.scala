@@ -14,6 +14,11 @@ class Cell(private val m_steps : Int,
   require(m_steps > 0 && m_stateHistory.length == m_steps && m_distalSegments.length == m_steps)
   
   /**
+   * @brief Number of history/prediction steps.
+   */
+  def steps : Int = m_steps 
+  
+  /**
    * Makes an empty cell with history size set to steps.
    * @param steps size of history and "prediction".
    * @return empty cell.

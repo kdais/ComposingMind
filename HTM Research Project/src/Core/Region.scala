@@ -98,16 +98,20 @@ class Region(private val m_cells : Vector[Cell],
   
   /**
    * Returns cells to which new segment must be added.
-   * @param step prediction step.
    * @param activeCells cells activated due to the input.
    * @return list of cells' indexes.
    */
-  def learningCellsOnStep(step : Int, activeCells : List[Int]) : List[Int] = {
-    //Take one cell from "unpredicted column" with least segments on the step.
+  def learningCells(activeCells : List[Int]) : List[Int] = {
+    
+    def numOfAllSegments(cell : Cell, step : Int) : Int=
+      if (step == cell.steps) 0 else numOfAllSegments(cell, step + 1) + cell.numOfSegments(step)
+    
+    //Take one cell from "unpredicted column" with least segments.
     for {
-      i <- List.range(0, m_columns.length, 1)
-      if (i until i + m_cellsPerColumn).forall(activeCells.contains(_))
-    } yield (i until i + m_cellsPerColumn).minBy(m_cells(_).numOfSegments(step))
+      index <- List.range(0, m_columns.length, 1)
+      if (index until index + m_cellsPerColumn).forall(activeCells.contains(_))
+    } yield (index until index + m_cellsPerColumn).
+             minBy((i : Int) => numOfAllSegments(m_cells(i), 0))
   }
   
   /**
