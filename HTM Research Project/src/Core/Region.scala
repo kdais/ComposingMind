@@ -51,7 +51,7 @@ class Region(private val m_cells : Vector[Cell],
   }
   
   /**
-   * Adjusts region's columns by modifying their permanences of those, which were
+   * Adjusts region's columns by modifying their of those, which were
    * activated due to given input.
    * @param data region's input.
    * @param activeCols list of activated columns.
@@ -83,6 +83,54 @@ class Region(private val m_cells : Vector[Cell],
   }
   
   /**
+   * Updates cells's history according to which cells were activated (used when learning is
+   * turned off).
+   * @param activeCells list of activated cells.
+   * @return new Region with updated history.
+   */
+  def withUpdatedHistory(activeCells : List[Int]) : Region = {
+    val updatedCells = for {
+      i <- Vector.range(0, m_cells.length, 1)
+    } yield if (activeCells.contains(i)) m_cells(i).makeActive else m_cells(i).makeActive
+    
+    new Region(updatedCells, m_columns)
+  }
+  
+  /**
+   * Returns cells to which new segment must be added.
+   * @param step prediction step.
+   * @param activeCells cells activated due to the input.
+   * @return list of cells' indexes.
+   */
+  def learningCellsOnStep(step : Int, activeCells : List[Int]) : List[Int] = {
+    //Take one cell from "unpredicted column" with least segments on the step.
+    for {
+      i <- List.range(0, m_columns.length, 1)
+      if (i until i + m_cellsPerColumn).forall(activeCells.contains(_))
+    } yield (i until i + m_cellsPerColumn).minBy(m_cells(_).numOfSegments(step))
+  }
+  
+  /**
+   * Returns cells which were active on specified step of history.
+   * @param step step of history.
+   * @return list of cells' indexes.
+   */
+  def activeCellsOnStep(step : Int) : List[Int] = filterCellsOnStep(_.wasActive(step))
+
+  /**
+   * Returns cells which were predictive on specified step of history.
+   * @param step step of prediction.
+   * @return list of cells' indexes.
+   */
+  def predictiveCellsOnStep(step : Int) : List[Int] =
+    filterCellsOnStep(_.isPredicted(m_cells, step))
+
+  /**
+   * Region's cells.
+   */
+  def cells : Vector[Cell] = m_cells
+  
+  /**
    * @brief Number of cells in one column.
    */
   private val m_cellsPerColumn : Int = m_cells.length / m_columns.length
@@ -91,6 +139,14 @@ class Region(private val m_cells : Vector[Cell],
    * @brief Size of the edge of region.
    */
   private val m_regionEdgeSize : Int = math.sqrt(m_columns.length).toInt
+  
+  /**
+   * Returns cells that satisfy predicate.
+   * @param predicate boolean predicate that takes Cell as parameter.
+   * @return list of cells' indexes.
+   */
+  private def filterCellsOnStep(predicate : Cell => Boolean) : List[Int] =
+    List.range(0, m_cells.length, 1).filter((i : Int) => predicate(m_cells(i)))
   
   /**
    * Converts vector index into 2D position.
