@@ -17,13 +17,4 @@ class RegionSuite extends FunSuite {
     
     val region = Region.genRegion(dataLength, 10, 5)
   }
-  
-  test ("Percentage of active columns is expected to be around 5%.") {
-    new TestRegion {
-      val data = genBoolVector(dataLength)
-      val actives = region.activeColumns(data, 0.01F)
-      println(actives)
-      assert(actives.length >= 1 && actives.length <= 5)
-    }
-  }
 }
