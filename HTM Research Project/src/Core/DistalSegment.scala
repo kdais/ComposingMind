@@ -12,6 +12,13 @@ class DistalSegment(private val m_connections : List[Int],
   require(m_expirationTime >= 0)
   
   /**
+   * Constructor with default expiration time.
+   * @param connections list of connection indexes.
+   * @return new Region with default expiration time.  
+   */
+  def this(connections : List[Int]) = this(connections, Constants.DistalExpirationTime)
+  
+  /**
    * Calculates overlap of the segment over given data. 
    * @param data collection of inputs to the segment.
    * @param get function that gets value from data at specified index.

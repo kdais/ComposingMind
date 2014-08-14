@@ -115,6 +115,36 @@ class Region(private val m_cells : Vector[Cell],
   }
   
   /**
+   * Adds distal segments to learning cells.
+   * @param learningCells indexes of cells to which distal segments must be added.
+   * @return new region with updated cells.
+   */
+  def withUpdatedPrediction(learningCells : List[Int]) : Region = {
+
+    lazy val activeCellsOnSteps : List[List[Int]] = for {
+      step <- List.range(0, m_cells(0).steps, 1)
+    } yield activeCellsOnStep(step)
+
+    val segments : List[DistalSegment] = activeCellsOnSteps.
+      takeWhile(!_.isEmpty).map(new DistalSegment(_))
+
+    def withSegments(cell : Cell, segs : List[DistalSegment], step : Int) : Cell = segs match {
+      case Nil => cell
+      case s :: ss => withSegments(cell.addSegment(s, step), ss, step + 1)
+    }
+    
+    def addSegmentsToCells(indexes : List[Int]) : Vector[Cell] = indexes match {
+      case Nil => m_cells
+      case ix :: ixs => {
+        val newCells = addSegmentsToCells(ixs)
+        newCells.updated(ix, withSegments(newCells(ix), segments, 0))
+      }
+    }
+
+    new Region(addSegmentsToCells(learningCells), m_columns)
+  }
+  
+  /**
    * Returns cells which were active on specified step of history.
    * @param step step of history.
    * @return list of cells' indexes.
@@ -194,6 +224,7 @@ object Region {
     
     val columns = cellIndexes.map(
         new Column(_, ProximalSegment.genDefaultSegment(dataLength / 2, dataLength)))
+        //XXX
     val cells = Vector.range(0, numOfCells, 1).map(i => new Cell(Constants.CellDefaultSteps))
     
     new Region(cells, columns)
