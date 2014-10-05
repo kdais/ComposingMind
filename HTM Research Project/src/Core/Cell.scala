@@ -7,17 +7,12 @@ package Core
  * @param m_stateHistory history of previous states - active or inactive.
  * @param m_distalSegments vector of distal segments for making prediction.
  */
-class Cell(private val m_steps : Int,
-		   private val m_stateHistory : List[Boolean],
-		   private val m_distalSegments : List[List[DistalSegment]]) {
+class Cell(val steps : Int,
+		   val stateHistory : List[Boolean],
+		   val distalSegments : List[List[DistalSegment]]) {
   
-  require(m_steps > 0 && m_stateHistory.length == m_steps && m_distalSegments.length == m_steps)
-  
-  /**
-   * @brief Number of history/prediction steps.
-   */
-  def steps : Int = m_steps 
-  
+  require(steps > 0 && stateHistory.length == steps && distalSegments.length == steps)
+    
   /**
    * Makes an empty cell with history size set to steps.
    * @param steps size of history and "prediction".
@@ -29,26 +24,26 @@ class Cell(private val m_steps : Int,
    * Makes cell active by pushing active state to its history of states.
    * @return new cell with active state. 
    */
-  def makeActive : Cell = new Cell(m_steps, true :: m_stateHistory.init, m_distalSegments)
+  def makeActive : Cell = new Cell(steps, true :: stateHistory.init, distalSegments)
   
   /**
    * Makes cell inactive by pushing active state to its history of states.
    * @return new cell with inactive state. 
    */
-  def makeInactive : Cell = new Cell(m_steps, false :: m_stateHistory.init, m_distalSegments)
+  def makeInactive : Cell = new Cell(steps, false :: stateHistory.init, distalSegments)
   
   /**
    * Checks whether cell was active on a specified step.
    * @param step (0 - current state).
    * @return true if cell was active, or false otherwise. 
    */
-  def wasActive(step : Int = 0) : Boolean = m_stateHistory(step)
+  def wasActive(step : Int = 0) : Boolean = stateHistory(step)
   
   /**
    * Checks whether cell was active on any step.
    * @return true if cell was active, or false otherwise. 
    */
-  def wasEverActive : Boolean = m_stateHistory.contains(true)
+  def wasEverActive : Boolean = stateHistory.contains(true)
   
   /**
    * Adds distal segment to cell.
@@ -56,8 +51,8 @@ class Cell(private val m_steps : Int,
    * @param step prediction step on which segment must be added.
    * @return cell with new segment.
    */
-  def addSegment(segment : DistalSegment, step : Int) : Cell = new Cell(m_steps, m_stateHistory,
-      m_distalSegments.updated(step, segment :: m_distalSegments(step)))
+  def addSegment(segment : DistalSegment, step : Int) : Cell = new Cell(steps, stateHistory,
+      distalSegments.updated(step, segment :: distalSegments(step)))
   
   /**
    * Checks whether cell is predicted on specified step.
@@ -66,7 +61,7 @@ class Cell(private val m_steps : Int,
    * @return true if cell is predicted, or false otherwise.  
    */
   def isPredicted(cells : Vector[Cell], step : Int) : Boolean =
-    m_distalSegments(step).exists(isSegmentPredicting(_, cells, step))
+    distalSegments(step).exists(isSegmentPredicting(_, cells, step))
   
   /**
    * Checks whether cell is predicted on any step.
@@ -74,7 +69,7 @@ class Cell(private val m_steps : Int,
    * @return true if cell is predicted, or false otherwise.
    */
   def isEverPredicted(cells : Vector[Cell]) : Boolean = {
-    val stepsRange = 0 until m_steps
+    val stepsRange = 0 until steps
     stepsRange.exists(isPredicted(cells, _))
   }
   
@@ -92,10 +87,10 @@ class Cell(private val m_steps : Int,
         seg.updateExpirationTime()
     
     val updatedSegments = for {
-      step <- List.range(0, m_steps)
-    } yield m_distalSegments(step).map(updateByPrediction(_, step)).filter(!_.expired)
+      step <- List.range(0, steps)
+    } yield distalSegments(step).map(updateByPrediction(_, step)).filter(!_.expired)
     
-    new Cell(m_steps, m_stateHistory, updatedSegments)
+    new Cell(steps, stateHistory, updatedSegments)
   }
   
   /**
@@ -103,7 +98,7 @@ class Cell(private val m_steps : Int,
    * @param step prediction step.
    * @return number of segments on the prediction step.
    */
-  def numOfSegments(step : Int) : Int = m_distalSegments(step).length
+  def numOfSegments(step : Int) : Int = distalSegments(step).length
     
   private def isSegmentPredicting(seg : DistalSegment,
                                   cells : Vector[Cell],

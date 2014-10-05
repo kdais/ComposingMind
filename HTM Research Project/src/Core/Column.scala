@@ -6,8 +6,8 @@ package Core
  * @param m_firstCell - index of the first column's cell in a region.
  * @param m_proximalSegment - column's proximal segment.
  */
-class Column(private val m_firstCell : Int,
-			 private val m_proximalSegment : ProximalSegment) {
+class Column(val firstCell : Int,
+			 val proximalSegment : ProximalSegment) {
   
   /**
    * Calculates overlap of the proximal segment over given data. 
@@ -15,7 +15,7 @@ class Column(private val m_firstCell : Int,
    * @return overlap value over input data.
    */
   def overlap(data : Vector[Boolean]) : Int =
-    m_proximalSegment.overlap(data, getData)
+    proximalSegment.overlap(data, getData)
   
   /**
    * Creates a list of active cells in context of region's prediction.
@@ -24,7 +24,7 @@ class Column(private val m_firstCell : Int,
    * @return list of active cells.
    */
   def activeCells(cells : Vector[Cell], nCells : Int) : List[Int] = {
-    val myCells = List.range(m_firstCell, m_firstCell + nCells, 1)
+    val myCells = List.range(firstCell, firstCell + nCells, 1)
     val predictedCells = myCells.filter(cells(_).isPredicted(cells, 0))
     
     //If none of the cells is predicted, activate entire column. 
@@ -39,15 +39,15 @@ class Column(private val m_firstCell : Int,
    * @return new segment with updated synapses. 
    */
   def updateConnections(delta : Float, data : Vector[Boolean]) : Column =
-    new Column(m_firstCell,
-    		   m_proximalSegment.updatePermanences(delta, data, getData))
+    new Column(firstCell,
+    		   proximalSegment.updatePermanences(delta, data, getData))
   
   /**
    * Percentage of column's synapses.
    * @return percentage of "active" connections.
    */
   def receptiveFieldSize : Float =
-    m_proximalSegment.numOfSynapses.toFloat / m_proximalSegment.numOfConnections.toFloat
+    proximalSegment.numOfSynapses.toFloat / proximalSegment.numOfConnections.toFloat
     
     private def getData(b : Boolean) = if (b) 1 else 0 
 }

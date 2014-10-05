@@ -6,10 +6,10 @@ package Core
  * @param m_connections list of connections.
  * @param m_expirationTime time for the segment to expire its duty.
  */
-class DistalSegment(private val m_connections : List[Int],
-					private val m_expirationTime : Int) extends DendriteSegment {
+class DistalSegment(val connections : List[Int],
+					val expirationTime : Int) extends DendriteSegment {
   
-  require(m_expirationTime >= 0)
+  require(expirationTime >= 0)
   
   /**
    * Constructor with default expiration time.
@@ -25,7 +25,7 @@ class DistalSegment(private val m_connections : List[Int],
    * @return overlap value over input data multiplied by boost.
    */
   def overlap[T](data : Vector[T], get : T => Int) : Int = {
-    val connectedValues = m_connections.map(s => get(data(s)))
+    val connectedValues = connections.map(s => get(data(s)))
     connectedValues.sum
   }
   
@@ -33,13 +33,13 @@ class DistalSegment(private val m_connections : List[Int],
    * Returns number of connections of the segment.
    * @return number of connections.
    */
-  def numOfConnections : Int = m_connections.length
+  def numOfConnections : Int = connections.length
   
   /**
    * Indexes of segment's connections.
    * @return list of indexes. 
    */
-  def connectionIndexes : List[Int] = m_connections
+  def connectionIndexes : List[Int] = connections
   
   /**
    * Updates expiration time of the segment.
@@ -47,17 +47,17 @@ class DistalSegment(private val m_connections : List[Int],
    * @return new distal segment with updated expiration time.
    */
   def updateExpirationTime(time : Int = -1) : DistalSegment = {
-    assert(m_expirationTime + time >= 0)
+    assert(expirationTime + time >= 0)
     
-    new DistalSegment(m_connections,
-        List(m_expirationTime + time, Constants.MaxDistalExpirationTime).min)
+    new DistalSegment(connections,
+        List(expirationTime + time, Constants.MaxDistalExpirationTime).min)
   }
   
   /**
    * Checks whether segment has expired.
    * @return true if segment expired its time, or false otherwise.
    */
-  def expired : Boolean = m_expirationTime == 0 
+  def expired : Boolean = expirationTime == 0 
 }
 
 /**

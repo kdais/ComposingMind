@@ -5,10 +5,10 @@ package Core
  * @param m_cells vector of region's cells (for sequence memory).
  * @param m_columns vector of region's columns (for spatial pooling).
  */
-class Region(private val m_cells : Vector[Cell],
-			 private val m_columns : Vector[Column]) {
+class Region(val cells : Vector[Cell],
+			 val columns : Vector[Column]) {
   
-  require(m_cells.length % m_columns.length == 0)
+  require(cells.length % columns.length == 0)
   
   /**
    * Returns cells which were active on specified step of history.
@@ -23,7 +23,7 @@ class Region(private val m_cells : Vector[Cell],
    * @return list of cells' indexes.
    */
   def predictiveCellsOnStep(step : Int) : List[Int] =
-    filterCellsOnStep(_.isPredicted(m_cells, step))
+    filterCellsOnStep(_.isPredicted(cells, step))
 
   def feedData(data : Vector[Boolean],
                activationPercentage : Float,
@@ -40,11 +40,6 @@ class Region(private val m_cells : Vector[Cell],
   }
 
   /**
-   * Region's cells.
-   */
-  def cells : Vector[Cell] = m_cells
-
-  /**
    * Performs spatial pooling - calculates winning columns over given data.
    * @param data - input vector.
    * @param activationPercentage - how many columns will be activated (0.0 - 1.0 value).
@@ -54,22 +49,22 @@ class Region(private val m_cells : Vector[Cell],
     
     assert(activationPercentage > 0.0F && activationPercentage < 1.0F)
     
-    val overlaps = m_columns.map(_.overlap(data))
-    val recepriveFields = m_columns.map(_.receptiveFieldSize)
+    val overlaps = columns.map(_.overlap(data))
+    val recepriveFields = columns.map(_.receptiveFieldSize)
     // Average percentage of synapses in columns.
-    val averageReceptiveField = recepriveFields.sum / m_columns.length
+    val averageReceptiveField = recepriveFields.sum / columns.length
     // Region's diagonal multiplied by average percentage of synapses.
     val inhibitionRadius = (m_regionEdgeSize *  averageReceptiveField *
       Region.inhibitionRadiusMultiplier).toInt
     // Number of columns that are allowed to be active inside inhibition radius.
-    val inhibitionThreshold = m_columns.length * activationPercentage toInt
+    val inhibitionThreshold = columns.length * activationPercentage toInt
     
     def manhattanDist(a : (Int, Int), b : (Int, Int)) : Int = {
       math.abs(a._1 - b._1) + math.abs(a._2 - b._2)
     }
       
     def neighborsIndexes(index : Int) : Vector[Int] = {
-      val allIndexes = Vector.range(0, m_columns.length, 1)
+      val allIndexes = Vector.range(0, columns.length, 1)
       
       allIndexes.filter(c => manhattanDist(toPoint(index), toPoint(c)) < inhibitionRadius &&
           index != c)
@@ -81,7 +76,7 @@ class Region(private val m_cells : Vector[Cell],
       overlaps(index) >= neighborsOverlaps(inhibitionThreshold)
     }
     
-    List.range(0, m_columns.length, 1).filter(isOverInhibitionThreshold(_))
+    List.range(0, columns.length, 1).filter(isOverInhibitionThreshold(_))
   }
   
   /**
@@ -95,13 +90,13 @@ class Region(private val m_cells : Vector[Cell],
     
     def adjustColumns(toUpdate : List[Int]) : Vector[Column] =
       if (toUpdate.isEmpty)
-        m_columns
+        columns
       else
         adjustColumns(toUpdate.tail).
-          updated(toUpdate.head, m_columns(toUpdate.head).
+          updated(toUpdate.head, columns(toUpdate.head).
               updateConnections(Constants.ProximalAdjustDelta, data))
 
-    new Region(m_cells, adjustColumns(activeCols))
+    new Region(cells, adjustColumns(activeCols))
   }
   
   /**
@@ -111,7 +106,7 @@ class Region(private val m_cells : Vector[Cell],
    */
   private def activeCells(activeCols : List[Int]) : List[Int] = {
     val cellLists : List[List[Int]] = 
-      for (i <- activeCols) yield m_columns(i).activeCells(m_cells, m_cellsPerColumn)
+      for (i <- activeCols) yield columns(i).activeCells(cells, m_cellsPerColumn)
 
     foldIndexes(cellLists)
   }
@@ -124,10 +119,10 @@ class Region(private val m_cells : Vector[Cell],
    */
   private def withUpdatedHistory(activeCells : List[Int]) : Region = {
     val updatedCells = for {
-      i <- Vector.range(0, m_cells.length, 1)
-    } yield if (activeCells.contains(i)) m_cells(i).makeActive else m_cells(i).makeActive
+      i <- Vector.range(0, cells.length, 1)
+    } yield if (activeCells.contains(i)) cells(i).makeActive else cells(i).makeActive
     
-    new Region(updatedCells, m_columns)
+    new Region(updatedCells, columns)
   }
   
   /**
@@ -142,10 +137,10 @@ class Region(private val m_cells : Vector[Cell],
     
     //Take one cell from "unpredicted column" with least segments.
     for {
-      index <- List.range(0, m_columns.length, 1)
+      index <- List.range(0, columns.length, 1)
       if (index until index + m_cellsPerColumn).forall(activeCells.contains(_))
     } yield (index until index + m_cellsPerColumn).
-             minBy((i : Int) => numOfAllSegments(m_cells(i), 0))
+             minBy((i : Int) => numOfAllSegments(cells(i), 0))
   }
   
   /**
@@ -156,7 +151,7 @@ class Region(private val m_cells : Vector[Cell],
   private def withUpdatedPrediction(learningCls : List[Int]) : Region = {
 
     lazy val activeCellsOnSteps : List[List[Int]] = for {
-      step <- List.range(0, m_cells(0).steps, 1)
+      step <- List.range(0, cells(0).steps, 1)
     } yield activeCellsOnStep(step)
 
     val segments : List[DistalSegment] = activeCellsOnSteps.
@@ -168,25 +163,25 @@ class Region(private val m_cells : Vector[Cell],
     }
     
     def addSegmentsToCells(indexes : List[Int]) : Vector[Cell] = indexes match {
-      case Nil => m_cells
+      case Nil => cells
       case ix :: ixs => {
         val newCells = addSegmentsToCells(ixs)
         newCells.updated(ix, addSegments(newCells(ix), segments, 0).withUpdatedSegments(cells))
       }
     }
 
-    new Region(addSegmentsToCells(learningCls), m_columns)
+    new Region(addSegmentsToCells(learningCls), columns)
   }
   
     /**
    * @brief Number of cells in one column.
    */
-  private val m_cellsPerColumn : Int = m_cells.length / m_columns.length
+  private val m_cellsPerColumn : Int = cells.length / columns.length
   
   /**
    * @brief Size of the edge of region.
    */
-  private val m_regionEdgeSize : Int = math.sqrt(m_columns.length).toInt
+  private val m_regionEdgeSize : Int = math.sqrt(columns.length).toInt
   
   /**
    * Returns cells that satisfy predicate.
@@ -194,7 +189,7 @@ class Region(private val m_cells : Vector[Cell],
    * @return list of cells' indexes.
    */
   private def filterCellsOnStep(predicate : Cell => Boolean) : List[Int] =
-    List.range(0, m_cells.length, 1).filter((i : Int) => predicate(m_cells(i)))
+    List.range(0, cells.length, 1).filter((i : Int) => predicate(cells(i)))
   
   /**
    * Converts vector index into 2D position.

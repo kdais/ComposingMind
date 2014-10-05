@@ -7,9 +7,9 @@ package Core
  * @param threshold value of permanence after which synapse is created.
  * @param boost segment overlap multiplier.
  */
-class ProximalSegment(private val m_connections : List[(Int, Float)],// (connection, permanence)
-					  private val m_threshold : Float, 
-					  private val m_boost : Int) extends DendriteSegment {
+class ProximalSegment(val connections : List[(Int, Float)],// (connection, permanence)
+					  val threshold : Float, 
+					  val boost : Int) extends DendriteSegment {
   
   /**
    * Auxiliary constructor with boost set to 1.
@@ -20,24 +20,12 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
     this(connections, threshold, 1)
     
   /**
-   * Segment's boost.
-   * @return boost value of the segment.
-   */
-  def boost : Int = m_boost
-    
-  /**
    * Updates boost of the segment.
    * @param newBoost new boost value.
    * @return new segment with updated boost.
    */
   def withBoost(newBoost : Int) : ProximalSegment =
-    new ProximalSegment(m_connections, m_threshold, newBoost)
-  
-  /**
-   * Segment's threshold.
-   * @return threshold value of the segment.
-   */
-  def threshold : Float = m_threshold
+    new ProximalSegment(connections, threshold, newBoost)
   
   /**
    * Updates threshold of the segment.
@@ -45,7 +33,7 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
    * @return new segment with updated threshold.
    */
   def withThreshold(newThreshold: Int) : ProximalSegment =
-    new ProximalSegment(m_connections, newThreshold, m_boost)
+    new ProximalSegment(connections, newThreshold, boost)
   
   /**
    * Updates permanences of connections by adding some value to connections, which
@@ -68,9 +56,9 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
     else
       permanence
     
-    val updatedConnections = m_connections.map(c => 
+    val updatedConnections = connections.map(c => 
       (c._1, setBounds(c._2 + delta * toSign(get(data(c._1))))))
-    new ProximalSegment(updatedConnections, m_threshold, m_boost)
+    new ProximalSegment(updatedConnections, threshold, boost)
   }
 		   
   /**
@@ -82,20 +70,20 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
   def overlap[T](data : Vector[T], get : T => Int) : Int = {
     // Map synapses to their activity values.
     val connectedValues = synapses.map(s => get(data(s._1)))
-    connectedValues.sum * m_boost
+    connectedValues.sum * boost
   }
   
   /**
    * Returns number of connections of the segment.
    * @return number of connections.
    */
-  def numOfConnections : Int = m_connections.length
+  def numOfConnections : Int = connections.length
   
   /**
    * Indexes of segment's connections.
    * @return list of indexes. 
    */
-  def connectionIndexes : List[Int] = m_connections.unzip._1
+  def connectionIndexes : List[Int] = connections.unzip._1
   
   /**
    * Returns number of synapses of the segment.
@@ -107,7 +95,7 @@ class ProximalSegment(private val m_connections : List[(Int, Float)],// (connect
    * Takes connections with permanence higher than threshold.
    * @return list of synapses.
    */
-  private def synapses : List[(Int, Float)] = m_connections.filter(_._2 >= m_threshold)
+  private def synapses : List[(Int, Float)] = connections.filter(_._2 >= threshold)
 }
 
 /**
