@@ -3,3 +3,7 @@
 *.settings
 *.cache
 *.jar
+*.sc
+.worksheet/
+"HTM Research Project/bin/"
+"HTM Research Project/.worksheet/"
