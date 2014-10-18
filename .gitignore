@@ -1,9 +1,23 @@
 *.class
+*.log
 .metadata/
+
+# sbt specific
+.cache/
+.history/
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
 *.settings
 *.cache
-*.jar
+.scala_dependencies
+.worksheet
+bin/
+lib/
 *.sc
-.worksheet/
-"HTM Research Project/bin/"
-"HTM Research Project/.worksheet/"
