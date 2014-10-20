@@ -1,6 +1,6 @@
 package Core
 
-case class State[S, +A](run : S => (A, S)) {
+case class State[S, +A](run : S => (A, State.LazyState[S])) {
   def map[B](f: A => B): State[S, B] =
     flatMap(a => State.unit(f(a)))
     
@@ -9,11 +9,15 @@ case class State[S, +A](run : S => (A, S)) {
     
   def flatMap[B](f: A => State[S, B]): State[S, B] = State(s => {
     val (a, s1) = run(s)
-    f(a).run(s1)
+    f(a).run(s1())
   })
 }
 
 object State {
-  def unit[S, A](a: => A): State[S, A] =
-    State(s => (a, s))
+  type LazyState[S] = () => S
+  
+  def unit[S, A](a: A): State[S, A] =
+    State(s => (a, lazyState(s)))
+
+  def lazyState[S](s: => S): LazyState[S] = () => s
 }
