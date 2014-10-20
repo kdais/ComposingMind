@@ -10,12 +10,11 @@ class Column(val firstCell : Int,
 			 val proximalSegment : ProximalSegment) {
   
   /**
-   * Calculates overlap of the proximal segment over given data. 
-   * @param data collection of inputs to the segment.
-   * @return overlap value over input data.
+   * Percentage of column's synapses.
+   * @return percentage of "active" connections.
    */
-  def overlap(data : Vector[Boolean]) : Int =
-    proximalSegment.overlap(data, getData)
+  def receptiveFieldSize : Float =
+    proximalSegment.numOfSynapses.toFloat / proximalSegment.numOfConnections.toFloat
   
   /**
    * Creates a list of active cells in context of region's prediction.
@@ -32,22 +31,28 @@ class Column(val firstCell : Int,
   }
   
   /**
+   * Calculates overlap of the proximal segment over given data. 
+   * @param data collection of inputs to the segment.
+   * @return overlap value over input data.
+   */
+  private def overlapValue(data : Vector[Boolean]) : Int =
+    proximalSegment.overlap(data, getData)
+  
+  /**
    * Updates permanences of connections by adding some value to connections, which
    * contributed to segment activation, and subtracting from those, which did not.
    * @param delta value by which permanences will be updated.
    * @param data collection of inputs to the segment.
    * @return new segment with updated synapses. 
    */
-  def updateConnections(delta : Float, data : Vector[Boolean]) : Column =
+  private def updateConnections(delta : Float, data : Vector[Boolean]) : Column =
     new Column(firstCell,
     		   proximalSegment.updatePermanences(delta, data, getData))
-  
-  /**
-   * Percentage of column's synapses.
-   * @return percentage of "active" connections.
-   */
-  def receptiveFieldSize : Float =
-    proximalSegment.numOfSynapses.toFloat / proximalSegment.numOfConnections.toFloat
     
     private def getData(b : Boolean) = if (b) 1 else 0 
+}
+
+object Column {
+  def overlap(data : Vector[Boolean], delta: Float): State[Column, Int] =
+    State((c: Column) => (c.overlapValue(data), State.lazyState(c.updateConnections(delta, data))))
 }

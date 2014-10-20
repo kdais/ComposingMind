@@ -28,13 +28,14 @@ class Region(val cells : Vector[Cell],
   def feedData(data : Vector[Boolean],
                activationPercentage : Float,
                learnOn : Boolean) : Region = {
-    val activeCols = activeColumns(data, activationPercentage)
+    val (overlaps, newColumns) = columns.map(Column.overlap(data, Constants.ProximalAdjustDelta).run(_)).unzip
+    val activeCols = activeColumns(overlaps, activationPercentage)
     val activateCls = activeCells(activeCols)
     val updatedRegion = withUpdatedHistory(activateCls)
     
     if (learnOn)
       updatedRegion.withUpdatedPrediction(learningCells(activateCls)).
-        adjustToInput(data, activeCols)
+        adjustToInput(newColumns, activeCols)
     else
       updatedRegion
   }
@@ -45,11 +46,10 @@ class Region(val cells : Vector[Cell],
    * @param activationPercentage - how many columns will be activated (0.0 - 1.0 value).
    * @return list of activated columns.
    */
-  private def activeColumns(data : Vector[Boolean], activationPercentage : Float) : List[Int] = {
+  private def activeColumns(overlaps : Vector[Int], activationPercentage : Float) : List[Int] = {
     
     assert(activationPercentage > 0.0F && activationPercentage < 1.0F)
     
-    val overlaps = columns.map(_.overlap(data))
     val recepriveFields = columns.map(_.receptiveFieldSize)
     // Average percentage of synapses in columns.
     val averageReceptiveField = recepriveFields.sum / columns.length
@@ -86,15 +86,13 @@ class Region(val cells : Vector[Cell],
    * @param activeCols list of activated columns.
    * @return new Region with columns, adjusted to given input.
    */
-  private def adjustToInput(data : Vector[Boolean], activeCols : List[Int]) : Region = {
+  private def adjustToInput(newColumns : Vector[State.LazyState[Column]], activeCols : List[Int]) : Region = {
     
     def adjustColumns(toUpdate : List[Int]) : Vector[Column] =
       if (toUpdate.isEmpty)
         columns
       else
-        adjustColumns(toUpdate.tail).
-          updated(toUpdate.head, columns(toUpdate.head).
-              updateConnections(Constants.ProximalAdjustDelta, data))
+        adjustColumns(toUpdate.tail).updated(toUpdate.head, newColumns(toUpdate.head)())
 
     new Region(cells, adjustColumns(activeCols))
   }
