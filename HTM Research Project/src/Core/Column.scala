@@ -6,9 +6,7 @@ package Core
  * @param m_firstCell - index of the first column's cell in a region.
  * @param m_proximalSegment - column's proximal segment.
  */
-class Column(val firstCell : Int,
-			 val proximalSegment : ProximalSegment) {
-  
+class Column(val firstCell : Int, val proximalSegment : ProximalSegment) {
   /**
    * Percentage of column's synapses.
    * @return percentage of "active" connections.
@@ -46,13 +44,19 @@ class Column(val firstCell : Int,
    * @return new segment with updated synapses. 
    */
   private def updateConnections(delta : Float, data : Vector[Boolean]) : Column =
-    new Column(firstCell,
-    		   proximalSegment.updatePermanences(delta, data, getData))
+    new Column(firstCell, proximalSegment.updatePermanences(delta, data, getData))
     
     private def getData(b : Boolean) = if (b) 1 else 0 
 }
 
 object Column {
+  /**
+   * Feeds the new portion of data to the column.
+   * @param data collection of inputs to the segment.
+   * @param delta value by which permanences will be updated.
+   * @return new State which transitions into overlap value
+   * and Column with updated permanences. 
+   */
   def overlap(data : Vector[Boolean], delta: Float): State[Column, Int] =
     State((c: Column) => (c.overlapValue(data), State.lazyState(c.updateConnections(delta, data))))
 }

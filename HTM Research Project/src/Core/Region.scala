@@ -5,8 +5,7 @@ package Core
  * @param m_cells vector of region's cells (for sequence memory).
  * @param m_columns vector of region's columns (for spatial pooling).
  */
-class Region(val cells : Vector[Cell],
-			 val columns : Vector[Column]) {
+class Region(val cells : Vector[Cell], val columns : Vector[Column]) {
   
   require(cells.length % columns.length == 0)
   
@@ -25,24 +24,29 @@ class Region(val cells : Vector[Cell],
   def predictiveCellsOnStep(step : Int) : List[Int] =
     filterCellsOnStep(_.isPredicted(cells, step))
 
-  def feedData(data : Vector[Boolean],
-               activationPercentage : Float,
-               learnOn : Boolean) : Region = {
+  /**
+   * Feeds a new portion of data to a region.
+   * @param data input vector.
+   * @param activationPercentage how many columns will be activated (0.0 - 1.0 value).
+   * @param learnOn indicates whether region is learning new connections.
+   * @return new Region with remembered history and updated connections if
+   * learning is turned on.
+   */
+  def feedData(data : Vector[Boolean], activationPercentage : Float, learnOn : Boolean) : Region = {
     val (overlaps, newColumns) = columns.map(Column.overlap(data, Constants.ProximalAdjustDelta).run(_)).unzip
     val activeCols = activeColumns(overlaps, activationPercentage)
-    val activateCls = activeCells(activeCols)
-    val updatedRegion = withUpdatedHistory(activateCls)
+    val activeCls = activeCells(activeCols)
+    val updatedRegion = withUpdatedHistory(activeCls)
     
     if (learnOn)
-      updatedRegion.withUpdatedPrediction(learningCells(activateCls)).
-        adjustToInput(newColumns, activeCols)
+      updatedRegion.withUpdatedPrediction(learningCells(activeCls)).adjustToInput(newColumns, activeCols)
     else
       updatedRegion
   }
 
   /**
    * Performs spatial pooling - calculates winning columns over given data.
-   * @param data - input vector.
+   * @param overlaps overlap value of each column.
    * @param activationPercentage - how many columns will be activated (0.0 - 1.0 value).
    * @return list of activated columns.
    */
@@ -82,7 +86,7 @@ class Region(val cells : Vector[Cell],
   /**
    * Adjusts region's columns by modifying their of those, which were
    * activated due to given input.
-   * @param data region's input.
+   * @param newColumns new columns with updated connections.
    * @param activeCols list of activated columns.
    * @return new Region with columns, adjusted to given input.
    */
