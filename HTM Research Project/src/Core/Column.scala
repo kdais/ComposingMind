@@ -6,13 +6,26 @@ package Core
  * @param m_firstCell - index of the first column's cell in a region.
  * @param m_proximalSegment - column's proximal segment.
  */
-class Column(val firstCell : Int, val proximalSegment : ProximalSegment) {
-  /**
-   * Percentage of column's synapses.
-   * @return percentage of "active" connections.
-   */
-  def receptiveFieldSize : Float =
-    proximalSegment.numOfSynapses.toFloat / proximalSegment.numOfConnections.toFloat
+class Column(val cells : Vector[Cell],
+             connections : List[(Int, Float)],// (connection, permanence)
+             threshold : Float,
+             boost : Int) extends ProximalSegment(connections, threshold, boost) {
+  
+  def this(cls: Vector[Cell], seg: ProximalSegment) =
+    this(cls, seg.connections, seg.threshold, seg.boost)
+    
+  def apply(i : Int) : Cell = cells(i)
+  
+  def updateCell(index : Int, f : Cell => Cell) : Column =
+    new Column(cells.updated(index, f(cells(index))), connections, threshold, boost)
+  
+  def updateCells(indexes : List[Int], f : Cell => Cell) : Column = indexes match {
+    case Nil => this
+    case i :: is => updateCell(i, f).updateCells(is, f) 
+  }
+  
+  def updateCellsIf(p : Cell => Boolean, f : Cell => Cell) : Column =
+    updateCells(List.range(0, cells.length).filter(i => p(cells(i))), f)
   
   /**
    * Creates a list of active cells in context of region's prediction.
@@ -20,33 +33,17 @@ class Column(val firstCell : Int, val proximalSegment : ProximalSegment) {
    * @param nCells number of cells in a column. 
    * @return list of active cells.
    */
-  def activeCells(cells : Vector[Cell], nCells : Int) : List[Int] = {
-    val myCells = List.range(firstCell, firstCell + nCells, 1)
-    val predictedCells = myCells.filter(cells(_).isPredicted(cells, 0))
+  def activeCells(colMapper: ColumnCellMapper) : List[Int] = {
+    val myCells = List.range(0, cells.length, 1)
+    val predictedCells = myCells.filter(cells(_).isPredicted(colMapper, 0))
     
-    //If none of the cells is predicted, activate entire column. 
+    //If none of the cells is predicted, activate entire column.
     if (!predictedCells.isEmpty) predictedCells else myCells
   }
   
-  /**
-   * Calculates overlap of the proximal segment over given data. 
-   * @param data collection of inputs to the segment.
-   * @return overlap value over input data.
-   */
-  private def overlapValue(data : Vector[Boolean]) : Int =
-    proximalSegment.overlap(data, getData)
-  
-  /**
-   * Updates permanences of connections by adding some value to connections, which
-   * contributed to segment activation, and subtracting from those, which did not.
-   * @param delta value by which permanences will be updated.
-   * @param data collection of inputs to the segment.
-   * @return new segment with updated synapses. 
-   */
-  private def updateConnections(delta : Float, data : Vector[Boolean]) : Column =
-    new Column(firstCell, proximalSegment.updatePermanences(delta, data, getData))
-    
-    private def getData(b : Boolean) = if (b) 1 else 0 
+  def updateSegment[T](delta : Float, data : Vector[T], get : T => Int) : Column = {
+    new Column (cells, updatePermanences(delta, data, get))
+  }
 }
 
 object Column {
@@ -57,6 +54,9 @@ object Column {
    * @return new State which transitions into overlap value
    * and Column with updated permanences. 
    */
-  def overlap(data : Vector[Boolean], delta: Float): State[Column, Int] =
-    State((c: Column) => (c.overlapValue(data), State.lazyState(c.updateConnections(delta, data))))
+  
+  private def boolGet = (b: Boolean) => if (b) 1 else 0
+  
+  def doOverlap(data : Vector[Boolean], delta: Float): State[Column, Int] =
+    State((c: Column) => (c.overlap(data, boolGet), State.lazyState(c.updateSegment(delta, data, boolGet))))
 }

@@ -56,21 +56,21 @@ class Cell(val steps : Int,
   
   /**
    * Checks whether cell is predicted on specified step.
-   * @param cells vector of cells of the region.
+   * @param colMapper vector of cells of the region.
    * @param step on which step we check if cell is predicted.
    * @return true if cell is predicted, or false otherwise.  
    */
-  def isPredicted(cells : Vector[Cell], step : Int) : Boolean =
-    distalSegments(step).exists(isSegmentPredicting(_, cells, step))
+  def isPredicted(colMapper : ColumnCellMapper, step : Int) : Boolean =
+    distalSegments(step).exists(isSegmentPredicting(_, colMapper, step))
   
   /**
    * Checks whether cell is predicted on any step.
    * @param cells vector of cells of the region.
    * @return true if cell is predicted, or false otherwise.
    */
-  def isEverPredicted(cells : Vector[Cell]) : Boolean = {
+  def isEverPredicted(colMapper : ColumnCellMapper) : Boolean = {
     val stepsRange = 0 until steps
-    stepsRange.exists(isPredicted(cells, _))
+    stepsRange.exists(isPredicted(colMapper, _))
   }
   
   /**
@@ -78,10 +78,10 @@ class Cell(val steps : Int,
    * @param cells vector of all cells in a region.
    * @return new cell with updated distal segments.
    */
-  def withUpdatedSegments(cells : Vector[Cell]) : Cell = {
+  def withUpdatedSegments(colMapper: ColumnCellMapper) : Cell = {
     
     def updateByPrediction(seg : DistalSegment, step : Int) : DistalSegment =
-      if (isSegmentPredicting(seg, cells, step))
+      if (isSegmentPredicting(seg, colMapper, step))
         seg.updateExpirationTime(Constants.DistalExpirationTime / 2)
       else
         seg.updateExpirationTime()
@@ -101,9 +101,10 @@ class Cell(val steps : Int,
   def numOfSegments(step : Int) : Int = distalSegments(step).length
     
   private def isSegmentPredicting(seg : DistalSegment,
-                                  cells : Vector[Cell],
+                                  colMapper : ColumnCellMapper,
                                   step : Int) : Boolean = {
-      seg.overlap(cells, (c : Cell) => if (c.wasActive(step)) 1 else 0).toFloat /
+      val indexes = Vector.range(0, colMapper.numOfCells)
+      seg.overlap(indexes, (i : Int) => if (colMapper.cell(i).wasActive(step)) 1 else 0).toFloat /
           seg.numOfConnections.toFloat > Constants.ProximalThreshold
     }
 }

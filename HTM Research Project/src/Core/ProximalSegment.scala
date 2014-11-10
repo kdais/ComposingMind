@@ -20,6 +20,12 @@ class ProximalSegment(val connections : List[(Int, Float)],// (connection, perma
     this(connections, threshold, 1)
     
   /**
+   * Percentage of column's synapses.
+   * @return percentage of "active" connections.
+   */
+  def receptiveFieldSize : Float = numOfSynapses.toFloat / numOfConnections.toFloat
+    
+  /**
    * Updates boost of the segment.
    * @param newBoost new boost value.
    * @return new segment with updated boost.
