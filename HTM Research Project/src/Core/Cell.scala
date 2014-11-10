@@ -3,13 +3,11 @@ package Core
 /**
  * @brief class Cell represents a single cell in a column that has its unique behavior
  * in terms of column's input and prediction of distal dendrites.
- * @param m_steps size of history and "prediction".
- * @param m_stateHistory history of previous states - active or inactive.
- * @param m_distalSegments vector of distal segments for making prediction.
+ * @param steps size of history and "prediction".
+ * @param stateHistory history of previous states - active or inactive.
+ * @param distalSegments vector of distal segments for making prediction.
  */
-class Cell(val steps : Int,
-		   val stateHistory : List[Boolean],
-		   val distalSegments : List[List[DistalSegment]]) {
+class Cell(val steps : Int, val stateHistory : List[Boolean], val distalSegments : List[List[DistalSegment]]) {
   
   require(steps > 0 && stateHistory.length == steps && distalSegments.length == steps)
     
@@ -65,7 +63,7 @@ class Cell(val steps : Int,
   
   /**
    * Checks whether cell is predicted on any step.
-   * @param cells vector of cells of the region.
+   * @param colMapper columns of the region.
    * @return true if cell is predicted, or false otherwise.
    */
   def isEverPredicted(colMapper : ColumnCellMapper) : Boolean = {
@@ -75,7 +73,7 @@ class Cell(val steps : Int,
   
   /**
    * Updates segments according to the state of other cells. Removes those which expired.
-   * @param cells vector of all cells in a region.
+   * @param colMapper columns of the region.
    * @return new cell with updated distal segments.
    */
   def withUpdatedSegments(colMapper: ColumnCellMapper) : Cell = {

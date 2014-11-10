@@ -2,8 +2,7 @@ package Core
 
 /**
  * @brief class Region implements spatial pooling and sequence memory.
- * @param m_cells vector of region's cells (for sequence memory).
- * @param m_columns vector of region's columns (for spatial pooling).
+ * @param colMapper wrapper over columns vector.
  */
 class Region(val colMapper : ColumnCellMapper) {
   
