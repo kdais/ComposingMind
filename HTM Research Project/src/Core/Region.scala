@@ -132,7 +132,8 @@ class Region(val colMapper : ColumnCellMapper) {
     
     //Take one cell from "unpredicted column" with least segments.
     for {
-      cells <- List.range(0, colMapper.numOfColumns).map(i => i until i + colMapper.cellsPerColumn)
+      cells <- List.range(0, colMapper.numOfColumns).
+        map(i => i * colMapper.cellsPerColumn until i * colMapper.cellsPerColumn + colMapper.cellsPerColumn)
       if cells.forall(activeCells.contains(_))
     } yield cells.minBy((i : Int) => numOfAllSegments(colMapper.cell(i), 0))
   }
