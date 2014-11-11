@@ -88,7 +88,7 @@ class Column(val cells : Vector[Cell],
  * @brief Column object.
  */
 object Column {  
-  private def boolGet = (b: Boolean) => if (b) 1 else 0
+  private def byteGet = (b: Byte) => b.toInt
   
   /**
    * Feeds the new portion of data to the column.
@@ -97,6 +97,6 @@ object Column {
    * @return new State which transitions into overlap value
    * and Column with updated permanences. 
    */
-  def doOverlap(data : Vector[Boolean], delta: Float): State[Column, Int] =
-    State((c: Column) => (c.overlap(data, boolGet), State.lazyState(c.updateSegment(delta, data, boolGet))))
+  def doOverlap(data : Vector[Byte], delta: Float): State[Column, Int] =
+    State((c: Column) => (c.overlap(data, byteGet), State.lazyState(c.updateSegment(delta, data, byteGet))))
 }

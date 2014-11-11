@@ -29,7 +29,7 @@ class Region(val colMapper : ColumnCellMapper) {
    * @return new Region with remembered history and updated connections if
    * learning is turned on.
    */
-  def feedData(data : Vector[Boolean], activationPercentage : Float, learnOn : Boolean) : Region = {
+  def feedData(data : Vector[Byte], activationPercentage : Float, learnOn : Boolean) : Region = {
     val (overlaps, newColumns) = (for {
       i <- Vector.range(0, colMapper.numOfColumns)
     } yield Column.doOverlap(data, Constants.ProximalAdjustDelta).run(colMapper(i))).unzip
