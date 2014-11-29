@@ -12,14 +12,14 @@ class HuffmanCodec[T](val alphabet : HuffmanCodec.Alphabet[T]) extends BinaryCod
    * @param symbol input symbol to be encoded.
    * @return byte vector with encoded data.
    */
-  protected def encodeSymbol(symbol : T) : Vector[Byte] = symbolMap(symbol)
+  def encodeSymbol(symbol : T) : Vector[Byte] = symbolMap(symbol)
   
   /**
    * Decodes byte vector.
    * @param coode byte vector with encoded data.
    * @return decoded data.
    */
-  protected def decodeSymbol(code: Vector[Byte]) : (T, Vector[Byte]) =
+  def decodeSymbol(code: Vector[Byte]) : (T, Vector[Byte]) =
     (symbolMap.find(p => p._2 == code.take(symbolCodeLength)).get._1, code.drop(symbolCodeLength))
   
   /**

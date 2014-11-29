@@ -32,12 +32,12 @@ abstract class BinaryCodec[T] {
    * @param symbol input symbol to be encoded.
    * @return byte vector with encoded data.
    */
-  protected def encodeSymbol(symbol : T) : Vector[Byte]
+  def encodeSymbol(symbol : T) : Vector[Byte]
   
   /**
    * Decodes byte vector.
    * @param coode byte vector with encoded data.
    * @return decoded data.
    */
-  protected def decodeSymbol(code: Vector[Byte]) : (T, Vector[Byte])
+  def decodeSymbol(code: Vector[Byte]) : (T, Vector[Byte])
 }
