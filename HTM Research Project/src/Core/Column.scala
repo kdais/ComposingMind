@@ -98,5 +98,5 @@ object Column {
    * and Column with updated permanences. 
    */
   def doOverlap(data : Vector[Byte], delta: Float): State[Column, Int] =
-    State((c: Column) => (c.overlap(data, byteGet), State.lazyState(c.updateSegment(delta, data, byteGet))))
+    new State((c: Column) => (c.overlap(data, byteGet), State.lazyState(c.updateSegment(delta, data, byteGet))))
 }
