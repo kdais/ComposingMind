@@ -93,6 +93,11 @@ class ColumnCellMapper (val columns : Vector[Column], val cellsPerColumn: Int) {
     new ColumnCellMapper(columns.map(_.updateCellsIf(p, f)), cellsPerColumn)
   
   /**
+   * Number of steps in the column.
+   */
+  def numOfSteps = cell(0).steps
+  
+  /**
    * Total number of cells.
    */
   val numOfCells = numOfColumns * cellsPerColumn
