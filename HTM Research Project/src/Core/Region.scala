@@ -1,3 +1,4 @@
+
 package Core
 
 /**
@@ -20,6 +21,14 @@ class Region(val colMapper : ColumnCellMapper) {
    */
   def predictiveCellsOnStep(step : Int) : List[Int] =
     filterCells(_.isPredicted(colMapper, step))
+    
+  /**
+   * Returns columns which were predictive on specified step of history.
+   * @param step step of prediction.
+   * @return list of columns' indexes.
+   */
+  def predictiveColumnsOnStep(step : Int) : List[Int] =
+    predictiveCellsOnStep(step).map(_ / colMapper.cellsPerColumn).distinct
 
   /**
    * Feeds a new portion of data to a region.
