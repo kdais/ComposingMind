@@ -114,7 +114,7 @@ class Region(val colMapper : ColumnCellMapper) {
    */
   private def activeCells(activeCols : List[Int]) : List[Int] = {
     val cellLists : List[List[Int]] = 
-      for (i <- activeCols) yield colMapper(i).activeCells(colMapper)
+      for (i <- activeCols) yield colMapper(i).activeCells(colMapper).map(_ + i * colMapper.cellsPerColumn)
 
     foldIndexes(cellLists)
   }
