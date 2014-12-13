@@ -98,14 +98,14 @@ class ColumnCellMapper (val columns : Vector[Column], val cellsPerColumn: Int) {
   def numOfSteps = cell(0).steps
   
   /**
-   * Total number of cells.
-   */
-  val numOfCells = numOfColumns * cellsPerColumn
-  
-  /**
    * Total number of columns
    */
   val numOfColumns = columns.length
+  
+  /**
+   * Total number of cells.
+   */
+  val numOfCells = numOfColumns * cellsPerColumn
   
   private def cellIndex(i : Int) = (i / cellsPerColumn, i % cellsPerColumn)
 }
