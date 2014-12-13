@@ -68,9 +68,7 @@ class Region(val colMapper : ColumnCellMapper) {
     // Region's diagonal multiplied by average percentage of synapses.
     val inhibitionRadius = (m_regionEdgeSize *  averageReceptiveField *
       Region.inhibitionRadiusMultiplier).toInt
-    // Number of columns that are allowed to be active inside inhibition radius.
-    val inhibitionThreshold = colMapper.numOfColumns * activationPercentage toInt
-    
+      
     def manhattanDist(a : (Int, Int), b : (Int, Int)) : Int = {
       math.abs(a._1 - b._1) + math.abs(a._2 - b._2)
     }
@@ -84,8 +82,10 @@ class Region(val colMapper : ColumnCellMapper) {
     
     def isOverInhibitionThreshold (index : Int) : Boolean = {
       val neighborsOverlaps = neighborsIndexes(index).map(overlaps(_)).sortWith((a, b) => a > b)
+      // Number of columns that are allowed to be active inside inhibition radius.
+      val inhibitionThreshold = neighborsOverlaps.length * activationPercentage toInt
       
-      overlaps(index) >= neighborsOverlaps(inhibitionThreshold)
+      overlaps(index) > neighborsOverlaps(inhibitionThreshold)
     }
     
     List.range(0, colMapper.numOfColumns).filter(isOverInhibitionThreshold(_))
