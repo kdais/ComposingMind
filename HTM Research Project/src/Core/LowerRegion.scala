@@ -33,7 +33,7 @@ class LowerRegion(val deltaEncoder : DeltaEncoder, colMapper : ColumnCellMapper)
         raw :: go(step + 1, newEncoder)
       }
 
-    go(1, deltaEncoder)
+    go(0, deltaEncoder)
   }
 
   private def intListToVector(list : List[Int]) : Vector[Byte] = list match {
