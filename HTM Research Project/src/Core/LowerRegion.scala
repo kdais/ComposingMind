@@ -27,7 +27,7 @@ class LowerRegion(val deltaEncoder : DeltaEncoder, colMapper : ColumnCellMapper)
     def go(step : Int, encoder : DeltaEncoder) : List[List[String]] =
       if (step == colMapper.numOfSteps) Nil
       else {
-        val prediction = intListToVector(predictiveColumnsOnStep(step))
+        val prediction = intListToVector(predictedDataOnStep(step))
         val (raw, newEncoder) = encoder.reverseDelta(prediction)
         
         raw :: go(step + 1, newEncoder)

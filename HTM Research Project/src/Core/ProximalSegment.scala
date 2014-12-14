@@ -98,6 +98,13 @@ class ProximalSegment(val connections : List[(Int, Float)],// (connection, perma
   def numOfSynapses : Int = synapses.length
   
   /**
+   * Takes connections with permanence higher than threshold
+   * and returns their indexes.
+   * @return list of synapses' indexes.
+   */
+  def synapseIndexes : List[Int] = synapses.map(_._1)
+  
+  /**
    * Takes connections with permanence higher than threshold.
    * @return list of synapses.
    */

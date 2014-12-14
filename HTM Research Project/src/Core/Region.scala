@@ -22,13 +22,13 @@ class Region(val colMapper : ColumnCellMapper) {
   def predictiveCellsOnStep(step : Int) : List[Int] =
     filterCells(_.isPredicted(colMapper, step))
     
-  /**
-   * Returns columns which were predictive on specified step of history.
+   /**
+   * Returns input data indexes which are predicted to be active
    * @param step step of prediction.
-   * @return list of columns' indexes.
+   * @return list of data vector indexes.
    */
-  def predictiveColumnsOnStep(step : Int) : List[Int] =
-    predictiveCellsOnStep(step).map(_ / colMapper.cellsPerColumn).distinct
+  def predictedDataOnStep(step : Int) : List[Int] =
+    colMapper.synapsesIndexes(predictiveColumnsOnStep(step))
 
   /**
    * Feeds a new portion of data to a region.
@@ -51,6 +51,14 @@ class Region(val colMapper : ColumnCellMapper) {
     else
       updatedRegion
   }
+  
+  /**
+   * Returns columns which were predictive on specified step of history.
+   * @param step step of prediction.
+   * @return list of columns' indexes.
+   */
+  private def predictiveColumnsOnStep(step : Int) : List[Int] =
+    predictiveCellsOnStep(step).map(_ / colMapper.cellsPerColumn).distinct
 
   /**
    * Performs spatial pooling - calculates winning columns over given data.

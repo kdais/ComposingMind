@@ -33,6 +33,15 @@ class ColumnCellMapper (val columns : Vector[Column], val cellsPerColumn: Int) {
   }
   
   /**
+   * Maps list of selected columns to their synapses.
+   * @param indexes columns' indexes.
+   * @return indexes of input data, to which selected
+   * columns established synapse connections.
+   */
+  def synapsesIndexes(indexes : List[Int]) : List[Int] =
+    indexes.map(columns(_).synapseIndexes).foldLeft(List[Int]())(_ ::: _).distinct
+  
+  /**
    * Updates i-th Column by applying f to it.
    * @param i index of a Column.
    * @param f function for modifying Column.
