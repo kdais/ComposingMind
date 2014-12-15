@@ -108,8 +108,9 @@ class Region(val colMapper : ColumnCellMapper) {
    */
   private def adjustToInput(newColumns : Vector[State.LazyState[Column]], activeCols : List[Int]) : Region = {
     def go(toUpdate : List[Int], mapper : ColumnCellMapper) : ColumnCellMapper = toUpdate match {
-      case Nil => colMapper
-      case i :: is => go(is, mapper.updateColumn(i, c => newColumns(i)()))
+      case Nil => mapper
+      // XXX Bad update. Make better.
+      case i :: is => go(is, mapper.updateColumn(i, c => new Column(c.cells, newColumns(i)())))
     }
     
     new Region(go(activeCols, colMapper))
