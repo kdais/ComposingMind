@@ -13,7 +13,7 @@ class DeltaValue(val value : String, val diff : (String, String) => String, val 
     
   private def reverseDelta(code : Vector[Byte]) : (String, Vector[Byte]) = {
     val (delta, codeTail) = codec.decodeSymbol(code)
-    (diff(delta, value), codeTail)
+    (diff(value, delta), codeTail)
   }
     
   private def update(newValue : String) = new DeltaValue(newValue, diff, codec)
