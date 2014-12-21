@@ -103,6 +103,6 @@ class Cell(val steps : Int, val stateHistory : List[Boolean], val distalSegments
                                   step : Int) : Boolean = {
       val indexes = Vector.range(0, colMapper.numOfCells)
       seg.overlap(indexes, (i : Int) => if (colMapper.cell(i).wasActive(step)) 1 else 0).toFloat /
-          seg.numOfConnections.toFloat > Constants.ProximalThreshold
+          seg.numOfConnections.toFloat > Constants.DistalPredictionThreshold
     }
 }
