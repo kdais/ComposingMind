@@ -8,27 +8,24 @@ package Core
 class Region(val colMapper : ColumnCellMapper) {
   
   /**
-   * Returns cells which were active on specified step of history.
-   * @param step step of history.
+   * Returns cells which are active.
    * @return list of cells' indexes.
    */
-  def activeCellsOnStep(step : Int) : List[Int] = filterCells(_.wasActive(step))
+  def activeCells() : List[Int] = filterCells(_.isActive)
 
   /**
-   * Returns cells which were predictive on specified step of history.
-   * @param step step of prediction.
+   * Returns cells which are predictive.
    * @return list of cells' indexes.
    */
-  def predictiveCellsOnStep(step : Int) : List[Int] =
-    filterCells(_.isPredicted(colMapper, step))
+  def predictiveCells() : List[Int] =
+    filterCells(_.isPredicted(colMapper))
     
    /**
-   * Returns input data indexes which are predicted to be active
-   * @param step step of prediction.
+   * Returns input data indexes which are predicted to be active.
    * @return list of data vector indexes.
    */
-  def predictedDataOnStep(step : Int) : List[Int] =
-    colMapper.synapsesIndexes(predictiveColumnsOnStep(step))
+  def predictedData() : List[Int] =
+    colMapper.synapsesIndexes(predictiveColumns())
 
   /**
    * Feeds a new portion of data to a region.
@@ -53,12 +50,11 @@ class Region(val colMapper : ColumnCellMapper) {
   }
   
   /**
-   * Returns columns which were predictive on specified step of history.
-   * @param step step of prediction.
+   * Returns columns which are predicted.
    * @return list of columns' indexes.
    */
-  private def predictiveColumnsOnStep(step : Int) : List[Int] =
-    predictiveCellsOnStep(step).map(_ / colMapper.cellsPerColumn).distinct
+  private def predictiveColumns() : List[Int] =
+    predictiveCells().map(_ / colMapper.cellsPerColumn).distinct
 
   /**
    * Performs spatial pooling - calculates winning columns over given data.
@@ -109,7 +105,6 @@ class Region(val colMapper : ColumnCellMapper) {
   private def adjustToInput(newColumns : Vector[State.LazyState[Column]], activeCols : List[Int]) : Region = {
     def go(toUpdate : List[Int], mapper : ColumnCellMapper) : ColumnCellMapper = toUpdate match {
       case Nil => mapper
-      // XXX Bad update. Make better.
       case i :: is => go(is, mapper.updateColumn(i, c => new Column(c.cells, newColumns(i)())))
     }
     
@@ -134,7 +129,7 @@ class Region(val colMapper : ColumnCellMapper) {
    * @param activeCells list of activated cells.
    * @return new Region with updated history.
    */
-  private def withUpdatedHistory(activeCells : List[Int]) : Region =     
+  private def withUpdatedHistory(activeCells : List[Int]) : Region =
     new Region(colMapper.updateCells(activeCells, _.makeActive).
         updateCells(List.range(0, colMapper.numOfCells).diff(activeCells), _.makeInactive))
   
@@ -144,18 +139,17 @@ class Region(val colMapper : ColumnCellMapper) {
    * @return list of cells' indexes.
    */
   private def learningCells(activeCells : List[Int]) : List[Int] = {
-    
-    def numOfAllSegments(cell : Cell, step : Int) : Int =
-      if (step == cell.steps) 0 else numOfAllSegments(cell, step + 1) + cell.numOfSegments(step)
-    
+
+    val cellsInCols = List.range(0, colMapper.numOfColumns).
+        map(i => i * colMapper.cellsPerColumn until i * colMapper.cellsPerColumn + colMapper.cellsPerColumn)
+
     //Take one cell from "unpredicted column" with least segments.
     for {
-      cells <- List.range(0, colMapper.numOfColumns).
-        map(i => i * colMapper.cellsPerColumn until i * colMapper.cellsPerColumn + colMapper.cellsPerColumn)
+      cells <- cellsInCols
       if cells.forall(activeCells.contains(_))
-    } yield cells.minBy((i : Int) => numOfAllSegments(colMapper.cell(i), 0))
+    } yield cells.minBy(colMapper.cell(_).numOfSegments())
   }
-  
+
   /**
    * Adds distal segments to learning cells.
    * @param learningCells indexes of cells to which distal segments must be added.
@@ -163,19 +157,9 @@ class Region(val colMapper : ColumnCellMapper) {
    */
   private def withUpdatedPrediction(learningCls : List[Int]) : Region = {
 
-    val activeCellsOnSteps : List[List[Int]] = for {
-      step <- List.range(0, colMapper.cell(0).steps)
-    } yield activeCellsOnStep(step)
+    val segment : DistalSegment = new DistalSegment(activeCells())
 
-    val segments : List[DistalSegment] = activeCellsOnSteps.
-      takeWhile(!_.isEmpty).map(new DistalSegment(_))
-
-    def addSegments(cell : Cell, segs : List[DistalSegment], step : Int) : Cell = segs match {
-      case Nil => cell
-      case s :: ss => addSegments(cell.addSegment(s, step), ss, step + 1)
-    }
-
-    new Region(colMapper.updateCells(learningCls, c => addSegments(c, segments, 0).withUpdatedSegments(colMapper)))
+    new Region(colMapper.updateCells(learningCls, _.addSegment(segment).withUpdatedSegments(colMapper)))
   }
   
   /**

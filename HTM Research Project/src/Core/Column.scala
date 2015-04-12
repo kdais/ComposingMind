@@ -65,7 +65,7 @@ class Column(val cells : Vector[Cell],
    */
   def activeCells(colMapper: ColumnCellMapper) : List[Int] = {
     val myCells = List.range(0, cells.length, 1)
-    val predictedCells = myCells.filter(cells(_).isPredicted(colMapper, 0))
+    val predictedCells = myCells.filter(cells(_).isPredicted(colMapper))
     
     //If none of the cells is predicted, activate entire column.
     if (!predictedCells.isEmpty) predictedCells else myCells

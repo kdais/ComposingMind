@@ -20,20 +20,22 @@ class LowerRegion(val deltaEncoder : DeltaEncoder, colMapper : ColumnCellMapper)
   }
 
   /**
-   * Makes prediction to all steps.
+   * Makes prediction what data will be predicted for next n steps.
+   * @param steps number of steps to predict.
+   * @param activationPercentage how many columns will be activated (0.0 - 1.0 value).
    * @return list of predictions.
    */
-  def predictedRawData() : List[List[String]] = {
-    def go(step : Int, encoder : DeltaEncoder) : List[List[String]] =
-      if (step == colMapper.numOfSteps) Nil
+  def predictedRawData(steps : Int = 1, activationPercentage : Float) : List[List[String]] = {
+    def go(step : Int, region : LowerRegion) : List[List[String]] =
+      if (step == steps) Nil
       else {
-        val prediction = intListToVector(predictedDataOnStep(step))
-        val (raw, newEncoder) = encoder.reverseDelta(prediction)
+        val prediction = intListToVector(region.predictedData())
+        val (raw, dummy) = region.deltaEncoder.reverseDelta(prediction)
         
-        raw :: go(step + 1, newEncoder)
+        raw :: go(step + 1, region.feedRawData(raw, activationPercentage, false))
       }
 
-    go(0, deltaEncoder)
+    go(0, this)
   }
 
   private def intListToVector(list : List[Int]) : Vector[Byte] = list match {
